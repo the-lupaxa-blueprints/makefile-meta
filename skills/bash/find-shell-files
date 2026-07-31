@@ -24,13 +24,16 @@
 #   - zsh
 #
 # Common repository metadata, dependency, virtual-environment and generated
-# directories are excluded from discovery.
+# directories are excluded from discovery, including the cloned makefile
+# skills library directory (".makefiles" by default, or the basename of an
+# explicit exclude directory passed as the second argument).
 #
 # Usage:
 #
 #   scripts/find-shell-files
 #   scripts/find-shell-files scripts
 #   scripts/find-shell-files /path/to/project
+#   scripts/find-shell-files /path/to/project .makefiles
 #
 # =============================================================================
 
@@ -41,6 +44,7 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 
 SEARCH_DIRECTORY="${1:-.}"
+EXTRA_EXCLUDE_DIR="${2:-}"
 
 # -----------------------------------------------------------------------------
 # Guards
@@ -126,6 +130,37 @@ is_shell_file_type() {
 # Newline characters inside filenames are not supported in the final
 # line-oriented output.
 
+PRUNE_NAMES=(
+    .git
+    .makefiles
+    .audit-env
+    .cache
+    .mypy_cache
+    .pytest_cache
+    .ruff_cache
+    .tox
+    .venv
+    __pycache__
+    build
+    dist
+    node_modules
+    site
+    vendor
+    venv
+)
+
+if [[ -n "${EXTRA_EXCLUDE_DIR}" ]]; then
+    PRUNE_NAMES+=("$(basename -- "${EXTRA_EXCLUDE_DIR}")")
+fi
+
+PRUNE_EXPR=()
+for name in "${PRUNE_NAMES[@]}"; do
+    if [[ ${#PRUNE_EXPR[@]} -gt 0 ]]; then
+        PRUNE_EXPR+=(-o)
+    fi
+    PRUNE_EXPR+=(-name "${name}")
+done
+
 while IFS= read -r -d '' path; do
     if is_shell_extension "${path}" ||
         is_shell_shebang "${path}" ||
@@ -134,23 +169,7 @@ while IFS= read -r -d '' path; do
     fi
 done < <(
     find "${SEARCH_DIRECTORY}" \
-        -type d \( \
-            -name .git \
-            -o -name .audit-env \
-            -o -name .cache \
-            -o -name .mypy_cache \
-            -o -name .pytest_cache \
-            -o -name .ruff_cache \
-            -o -name .tox \
-            -o -name .venv \
-            -o -name __pycache__ \
-            -o -name build \
-            -o -name dist \
-            -o -name node_modules \
-            -o -name site \
-            -o -name vendor \
-            -o -name venv \
-        \) -prune \
+        -type d \( "${PRUNE_EXPR[@]}" \) -prune \
         -o -type f -print0
 )
 

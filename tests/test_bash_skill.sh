@@ -25,6 +25,7 @@ assert_not_contains "$out" "python-lint"
 
 out="$(make -C "$CONSUMER" bash-list-scripts SKILLS=bash)"
 assert_contains "$out" "bin/ok.sh"
+assert_not_contains "$out" ".makefiles/"
 
 make -C "$CONSUMER" bash-syntax SKILLS=bash
 

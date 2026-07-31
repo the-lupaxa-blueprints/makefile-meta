@@ -5,7 +5,7 @@ SHELL_SOURCE_DIR ?= .
 SHELL_FILE_FINDER ?= $(MAKEFILES_DIR)/skills/bash/find-shell-files
 SHELL_FILES ?= $(shell \
 	if [ -x "$(SHELL_FILE_FINDER)" ]; then \
-		"$(SHELL_FILE_FINDER)" "$(SHELL_SOURCE_DIR)" 2>/dev/null; \
+		"$(SHELL_FILE_FINDER)" "$(SHELL_SOURCE_DIR)" "$(MAKEFILES_DIR)" 2>/dev/null; \
 	fi \
 )
 

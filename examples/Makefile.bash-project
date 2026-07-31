@@ -21,8 +21,11 @@ init install:
 		exit 2; \
 	fi; \
 	echo "==> Cloning $(MAKEFILES_REPO) into $(MAKEFILES_DIR)"; \
-	git clone "$(MAKEFILES_REPO)" "$(MAKEFILES_DIR)"; \
-	$(MAKE) --no-print-directory _makefiles-checkout
+	if ! git clone "$(MAKEFILES_REPO)" "$(MAKEFILES_DIR)" || ! $(MAKE) --no-print-directory _makefiles-checkout; then \
+		echo "==> Removing incomplete $(MAKEFILES_DIR) so 'make init' can be retried" >&2; \
+		rm -rf "$(MAKEFILES_DIR)"; \
+		exit 2; \
+	fi
 
 update:
 	@set -e; \
@@ -43,6 +46,12 @@ _makefiles-checkout:
 		git -C "$(MAKEFILES_DIR)" pull --ff-only origin master; \
 	else \
 		git -C "$(MAKEFILES_DIR)" checkout "$(MAKEFILES_REF)"; \
+	fi; \
+	if [ ! -f "$(MAKEFILES_DIR)/skills/versioning.mk" ]; then \
+		short_sha="$$(git -C "$(MAKEFILES_DIR)" rev-parse --short HEAD 2>/dev/null || echo unknown)"; \
+		echo "ERROR: $(MAKEFILES_DIR)/skills/versioning.mk not found after checking out MAKEFILES_REF=$(MAKEFILES_REF) (commit $$short_sha)." >&2; \
+		echo "This ref does not look like a valid makefile-skills checkout." >&2; \
+		exit 2; \
 	fi; \
 	echo "==> makefile skills at $$(git -C "$(MAKEFILES_DIR)" rev-parse --short HEAD) ($(MAKEFILES_REF))"
 

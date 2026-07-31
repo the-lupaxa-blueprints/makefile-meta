@@ -27,4 +27,17 @@ assert_not_contains "$out" "python-lint"
 # Target exists when skill enabled.
 make -C "$CONSUMER" -n python-lint SKILLS=python >/dev/null
 
+# Minimal bumpversion file so `make status` can print a version.
+cat > "$CONSUMER/.bumpversion.toml" <<'EOF'
+[tool.bumpversion]
+current_version = "0.1.0"
+EOF
+
+# status includes a Python section fragment when the skill is enabled.
+out="$(make -C "$CONSUMER" status SKILLS=python)"
+assert_contains "$out" "Python:"
+
+out="$(make -C "$CONSUMER" status)"
+assert_not_contains "$out" "Python:"
+
 echo "PASS: test_python_skill.sh"

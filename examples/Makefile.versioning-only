@@ -77,8 +77,8 @@ help:
 	@echo "Lifecycle:"
 	@echo "  init / install      Clone makefile skills into $(MAKEFILES_DIR)"
 	@echo "  update              Refresh skills to MAKEFILES_REF ($(MAKEFILES_REF))"
-	@echo "  status              Show project, version, tool and Git status"
-	@echo "  doctor              Check tools and config for enabled skills"
+	@echo "  status              Show project, version, Git, and enabled-skill status"
+	@echo "  doctor              Run all doctors (lifecycle + versioning + enabled skills)"
 	@echo "  transport           $(MAKEFILES_TRANSPORT) -> $(MAKEFILES_REPO)"
 	@echo
 	@if [ ! -f "$(MAKEFILES_DIR)/skills/versioning.mk" ]; then \

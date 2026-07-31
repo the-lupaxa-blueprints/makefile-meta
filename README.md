@@ -72,3 +72,14 @@ Enable `bash` for `make bash-list-scripts`, `make bash-syntax`,
 
 Run `make help` in a consumer project to see only the versioning commands and
 the optional skills selected by `SKILLS`.
+
+## Documentation site
+
+Project docs use MkDocs Material (Lupaxa technical documentation template):
+
+```bash
+python -m pip install -r requirements.txt
+make mkdocs-serve   # requires SKILLS including mkdocs, or: python -m mkdocs serve
+```
+
+Source lives in `mkdocs/`; config is `mkdocs.yml` at the repository root.

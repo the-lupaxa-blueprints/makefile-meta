@@ -23,9 +23,18 @@ make -C "$CONSUMER" init MAKEFILES_REPO="$BARE"
 
 out="$(make -C "$CONSUMER" help)"
 assert_contains "$out" "doctor"
+assert_contains "$out" "Lifecycle:"
+# status belongs under Lifecycle help, not Versioning
+ver_help="$(make -C "$CONSUMER" help-versioning)"
+set +e
+printf '%s\n' "$ver_help" | grep -E '^[[:space:]]+status[[:space:]]' >/dev/null
+status_in_versioning=$?
+set -e
+test "$status_in_versioning" -ne 0
 
 out="$(make -C "$CONSUMER" help SKILLS=bash)"
 assert_contains "$out" "bash-doctor"
+assert_contains "$out" "doctor-versioning"
 
 cat > "$CONSUMER/.bumpversion.toml" <<'TOML'
 [tool.bumpversion]

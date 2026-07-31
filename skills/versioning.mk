@@ -18,7 +18,6 @@ PROJECT_VERSION := $(shell sed -n 's/^[[:space:]]*current_version[[:space:]]*=[[
 
 help-versioning:
 	@echo "Versioning:"
-	@echo "  status              Show project, version, tool and Git status"
 	@echo "  version             Show the current project version"
 	@echo "  show-version-flow   Show the version stage and valid next steps"
 	@echo "  bump-dev            Start or continue the next patch development cycle"

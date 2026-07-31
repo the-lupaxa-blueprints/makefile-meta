@@ -1,0 +1,127 @@
+# Usage
+
+## Diagnose the environment
+
+```bash
+make doctor
+```
+
+`make doctor` is the top-level check: lifecycle (clone/transport), then
+`doctor-versioning`, then each enabled skill doctor (`python-doctor`,
+`mkdocs-doctor`, `bash-doctor`, …). It exits non-zero when critical items are
+missing. You can still run any skill doctor on its own.
+
+```bash
+make status
+```
+
+`make status` is also top-level (listed under Lifecycle, not Versioning):
+informational project, version stage, Git, and sections for enabled skills.
+It does not fail on missing tools.
+
+## Versioning workflow
+
+Versioning is always on. Versions live in `.bumpversion.toml` and are applied
+with `bump-my-version`.
+
+Enforced flow:
+
+```text
+Stable → Development (-devN) → Release candidate (-rcN) → Stable
+```
+
+Typical patch cycle:
+
+```bash
+make bump-dev      # 1.2.3 → 1.2.4-dev1 (or bump -devN)
+make bump-dev      # 1.2.4-dev1 → 1.2.4-dev2
+make bump-rc       # → 1.2.4-rc1
+make release       # → 1.2.4
+```
+
+From a stable version you can also start a minor or major cycle:
+
+```bash
+make bump-minor    # 1.2.3 → 1.3.0-dev1
+make bump-major    # 1.2.3 → 2.0.0-dev1
+```
+
+See valid next steps for the current stage:
+
+```bash
+make show-version-flow
+```
+
+## Python skill
+
+```make
+SKILLS ?= python
+```
+
+Common loop:
+
+```bash
+make python-install-dev
+make python-lint
+make python-type
+make python-test
+make python-check          # lint + type + test
+make python-build
+```
+
+Language targets are prefixed (`python-lint`, not `lint`) so they do not clash
+with other skills.
+
+## MkDocs skill
+
+```make
+SKILLS ?= python mkdocs
+```
+
+```bash
+make mkdocs-build
+make mkdocs-serve
+make mkdocs-serve MKDOCS_PORT=8001
+make mkdocs-clean
+```
+
+Serve defaults to `127.0.0.1:8000`. Override `MKDOCS_PORT` / `MKDOCS_HOST` when
+running several sites at once.
+
+This repository’s own docs live under `mkdocs/` with `mkdocs.yml` at the repo
+root (Material theme from the Lupaxa technical documentation template).
+
+## Bash skill
+
+```make
+SKILLS ?= bash
+```
+
+```bash
+make bash-list-scripts
+make bash-syntax
+make bash-shellcheck
+make bash-check
+```
+
+Discovery finds `.sh` / `.bash` files, shebang lines, and scripts identified by
+`file(1)` (including extensionless commands). The skills clone (`.makefiles/`)
+is excluded.
+
+If nothing is found:
+
+```bash
+make bash-list-scripts SHELL_SOURCE_DIR=bin
+# or
+make bash-list-scripts SHELL_FILES="bin/tool scripts/install.sh"
+```
+
+## Switching SSH and HTTPS
+
+```make
+MAKEFILES_TRANSPORT ?= https   # or ssh | http
+```
+
+`MAKEFILES_REPO_SSH` and `MAKEFILES_REPO_HTTP` hold the two URLs.
+`MAKEFILES_TRANSPORT` selects which one `make init` / `make update` use.
+Override `MAKEFILES_REPO` only for one-offs (for example a local path).

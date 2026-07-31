@@ -1,0 +1,130 @@
+# =============================================================================
+# Site Information
+# =============================================================================
+
+site_name: makefile-skills
+
+site_description: >-
+  Reusable Makefile skills for versioning, Python, MkDocs, and Bash —
+  adopt a thin project wrapper and pull shared make targets from this library.
+
+site_author: The Lupaxa Project
+
+site_url: https://the-lupaxa-blueprints.github.io/makefile-meta/
+
+repo_name: the-lupaxa-blueprints/makefile-meta
+repo_url: https://github.com/the-lupaxa-blueprints/makefile-meta
+
+extra:
+  generator: false
+  # Counter.dev analytics (omit counter_dev_id to disable).
+  # Create a site at https://counter.dev and set the id below.
+  # counter_dev_id: <uuid>
+  counter_dev_utcoffset: 0
+  social_image: assets/images/social-card.png
+  social_image_width: 1200
+  social_image_height: 630
+  social_logo: assets/images/logo.png
+  social_locale: en_GB
+  theme_color: "#203959"
+  twitter_card: summary_large_image
+
+# =============================================================================
+# Content
+# =============================================================================
+
+docs_dir: mkdocs
+
+# =============================================================================
+# Theme
+# =============================================================================
+
+theme:
+  name: material
+  custom_dir: overrides
+  language: en
+  logo: assets/images/logo.png
+  favicon: assets/images/favicon.png
+
+  features:
+    - content.code.copy
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.top
+    - toc.follow
+
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: light-blue
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+
+  icon:
+    repo: fontawesome/brands/github
+
+# =============================================================================
+# Plugins
+# =============================================================================
+
+plugins:
+  - search
+
+# =============================================================================
+# Navigation
+# =============================================================================
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Usage: usage.md
+  - Reference: reference.md
+  - Examples: examples.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: false
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.superfences
+
+# =============================================================================
+# Additional Assets
+# =============================================================================
+
+extra_css:
+  - assets/stylesheets/00-tokens.css
+  - assets/stylesheets/10-base.css
+  - assets/stylesheets/20-layout.css
+  - assets/stylesheets/30-navigation.css
+  - assets/stylesheets/40-components/buttons.css
+  - assets/stylesheets/40-components/footer.css
+  - assets/stylesheets/90-responsive.css
+  - assets/stylesheets/95-print.css
+  - assets/stylesheets/99-overrides.css
+
+extra_javascript:
+  - assets/javascript/page-lifecycle.js
+  - assets/javascript/header-active-nav.js
+
+# =============================================================================
+# Copyright
+# =============================================================================
+
+copyright: >
+  <span class="footer-copyright">© 2026 <strong>The Lupaxa Project</strong>. All rights reserved.</span>
+  <span class="footer-tagline">Where exploration meets precision.</span>
+  <span class="footer-tagline">Where the untamed meets the engineered.</span>

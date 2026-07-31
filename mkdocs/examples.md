@@ -4,12 +4,16 @@ Ready-made wrappers live in [`examples/`](https://github.com/the-lupaxa-blueprin
 Each file is a copy of [`templates/Makefile`](https://github.com/the-lupaxa-blueprints/makefile-skills/blob/master/templates/Makefile)
 with only the `SKILLS` line changed.
 
+<div class="lupaxa-table lupaxa-table--examples" markdown="1">
+
 | File | `SKILLS` | Use when |
 | --- | --- | --- |
 | `Makefile.versioning-only` | _(empty)_ | Version bumps only |
 | `Makefile.python` | `python` | Python package / app |
 | `Makefile.python-docs` | `python mkdocs` | Python project with MkDocs |
 | `Makefile.bash-project` | `bash` | Shell-script repositories |
+
+</div>
 
 ## Versioning only
 

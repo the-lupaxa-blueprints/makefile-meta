@@ -15,12 +15,16 @@ wrapper and `.gitignore`.
 
 ## Skills at a glance
 
+<div class="lupaxa-table lupaxa-table--skills" markdown="1">
+
 | Skill | Always on? | Purpose |
 | --- | --- | --- |
 | Versioning | Yes | Controlled bump / RC / release flow with `bump-my-version` |
 | Python | Optional | Lint, type-check, test, audit, build, publish (prefixed targets) |
 | MkDocs | Optional | Build and serve docs (`mkdocs-serve` supports custom ports) |
 | Bash | Optional | Discover scripts, `bash -n`, ShellCheck |
+
+</div>
 
 ## Next steps
 

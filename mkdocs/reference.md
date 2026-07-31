@@ -2,6 +2,8 @@
 
 ## Lifecycle (wrapper)
 
+<div class="lupaxa-table lupaxa-table--commands" markdown="1">
+
 | Command | Description |
 | --- | --- |
 | `make init` / `make install` | Sparse-clone `skills/` into `MAKEFILES_DIR` (default `.makefiles`) |
@@ -11,7 +13,11 @@
 | `make doctor` | Top-level: lifecycle + `doctor-versioning` + each enabled `*-doctor` |
 | `make completion` | Print bash completion snippet for `make` targets |
 
+</div>
+
 ### Wrapper variables
+
+<div class="lupaxa-table lupaxa-table--vars-desc" markdown="1">
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -23,7 +29,11 @@
 | `MAKEFILES_REPO` | _(derived)_ | Selected URL; override for one-offs |
 | `MAKEFILES_REF` | `head` | `head` → tip of `master`, or a tag such as `v1.0.0` |
 
+</div>
+
 ## Versioning (always on)
+
+<div class="lupaxa-table lupaxa-table--commands" markdown="1">
 
 | Command | Description |
 | --- | --- |
@@ -37,7 +47,11 @@
 | `make bump-final` | Alias of `release` |
 | `make doctor-versioning` | Check version file, bump tool, git work tree |
 
+</div>
+
 ### Versioning variables
+
+<div class="lupaxa-table lupaxa-table--vars" markdown="1">
 
 | Variable | Default |
 | --- | --- |
@@ -45,9 +59,13 @@
 | `BUMP` | `bump-my-version` |
 | `PROJECT_NAME` | directory name |
 
+</div>
+
 ## Python skill
 
 Enable with `SKILLS ?= python` (or include `python` in a list).
+
+<div class="lupaxa-table lupaxa-table--commands" markdown="1">
 
 | Command | Description |
 | --- | --- |
@@ -67,7 +85,11 @@ Enable with `SKILLS ?= python` (or include `python` in a list).
 | `make python-publish` | Hatch publish |
 | `make python-clean` | Remove Python artefacts |
 
+</div>
+
 ### Python variables
+
+<div class="lupaxa-table lupaxa-table--vars" markdown="1">
 
 | Variable | Default |
 | --- | --- |
@@ -76,9 +98,13 @@ Enable with `SKILLS ?= python` (or include `python` in a list).
 | `PYPROJECT_FILE` | `pyproject.toml` |
 | `PYTHON` / `RUFF` / `MYPY` / `PYTEST` / `HATCH` | tool names on `PATH` |
 
+</div>
+
 ## MkDocs skill
 
 Enable with `SKILLS ?= mkdocs`.
+
+<div class="lupaxa-table lupaxa-table--commands" markdown="1">
 
 | Command | Description |
 | --- | --- |
@@ -87,7 +113,11 @@ Enable with `SKILLS ?= mkdocs`.
 | `make mkdocs-serve` | Live-reload server |
 | `make mkdocs-clean` | Remove `site/` |
 
+</div>
+
 ### MkDocs variables
+
+<div class="lupaxa-table lupaxa-table--vars" markdown="1">
 
 | Variable | Default |
 | --- | --- |
@@ -96,9 +126,13 @@ Enable with `SKILLS ?= mkdocs`.
 | `MKDOCS_PORT` | `8000` |
 | `MKDOCS` | `mkdocs` |
 
+</div>
+
 ## Bash skill
 
 Enable with `SKILLS ?= bash`.
+
+<div class="lupaxa-table lupaxa-table--commands" markdown="1">
 
 | Command | Description |
 | --- | --- |
@@ -109,7 +143,11 @@ Enable with `SKILLS ?= bash`.
 | `make bash-lint` | Alias of `bash-shellcheck` |
 | `make bash-test` / `make bash-check` | syntax + ShellCheck |
 
+</div>
+
 ### Bash variables
+
+<div class="lupaxa-table lupaxa-table--vars" markdown="1">
 
 | Variable | Default |
 | --- | --- |
@@ -118,6 +156,8 @@ Enable with `SKILLS ?= bash`.
 | `SHELL_FILES` | auto-discovered |
 | `SHELLCHECK_SHELL` | `bash` |
 | `BASH` / `SHELLCHECK` | tool names on `PATH` |
+
+</div>
 
 ## Repository layout (this library)
 

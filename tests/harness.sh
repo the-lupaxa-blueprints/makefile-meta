@@ -3,6 +3,17 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# Bare repo whose master/HEAD match REPO_ROOT HEAD so head→master checkout
+# in tests sees the same commit as the worktree (not upstream master).
+makefiles_bare_repo() {
+  local dest="$1"
+  local head_commit
+  head_commit="$(git -C "$REPO_ROOT" rev-parse HEAD)"
+  git clone --bare "$REPO_ROOT" "$dest"
+  git --git-dir="$dest" update-ref refs/heads/master "$head_commit"
+  git --git-dir="$dest" symbolic-ref HEAD refs/heads/master
+}
+
 make_consumer() {
   local dest="$1"
   mkdir -p "$dest"

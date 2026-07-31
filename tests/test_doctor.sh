@@ -24,13 +24,26 @@ make -C "$CONSUMER" init MAKEFILES_REPO="$BARE"
 out="$(make -C "$CONSUMER" help)"
 assert_contains "$out" "doctor"
 assert_contains "$out" "Lifecycle:"
-# status belongs under Lifecycle help, not Versioning
+assert_contains "$out" "Status:"
+# status/doctor belong under Status, not Versioning
 ver_help="$(make -C "$CONSUMER" help-versioning)"
 set +e
 printf '%s\n' "$ver_help" | grep -E '^[[:space:]]+status[[:space:]]' >/dev/null
 status_in_versioning=$?
+printf '%s\n' "$out" | awk '/^Status:/{p=1;next} /^[A-Za-z]/{if(p&&$0!~/^Status:/)exit} p' | grep -E '^[[:space:]]+status[[:space:]]' >/dev/null
+status_in_status=$?
+printf '%s\n' "$out" | awk '/^Status:/{p=1;next} /^[A-Za-z]/{if(p&&$0!~/^Status:/)exit} p' | grep -E '^[[:space:]]+doctor[[:space:]]' >/dev/null
+doctor_in_status=$?
 set -e
 test "$status_in_versioning" -ne 0
+test "$status_in_status" -eq 0
+test "$doctor_in_status" -eq 0
+
+# completion script is part of the sparse skills tree
+test -f "$CONSUMER/.makefiles/skills/completion/bash"
+out="$(make -C "$CONSUMER" completion)"
+assert_contains "$out" "_makefile_skills_completions"
+assert_contains "$out" "complete"
 
 out="$(make -C "$CONSUMER" help SKILLS=bash)"
 assert_contains "$out" "bash-doctor"

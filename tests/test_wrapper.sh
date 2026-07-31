@@ -16,6 +16,8 @@ out="$(make -C "$CONSUMER" help)"
 assert_contains "$out" "init"
 assert_contains "$out" "update"
 assert_contains "$out" "status"
+assert_contains "$out" "doctor"
+assert_contains "$out" "Status:"
 assert_contains "$out" "make init"
 assert_contains "$out" "transport"
 
@@ -41,10 +43,15 @@ set -e
 test "$rc" -ne 0
 assert_contains "$err" "make init"
 
-# init clones from local repo path
+# init clones from local repo path (skills/ only — sparse checkout)
 make -C "$CONSUMER" init MAKEFILES_REPO="$BARE"
 test -d "$CONSUMER/.makefiles/skills"
 test -f "$CONSUMER/.makefiles/skills/versioning.mk"
+test ! -e "$CONSUMER/.makefiles/mkdocs"
+test ! -e "$CONSUMER/.makefiles/overrides"
+test ! -e "$CONSUMER/.makefiles/examples"
+test ! -e "$CONSUMER/.makefiles/tests"
+test ! -e "$CONSUMER/.makefiles/mkdocs.yml"
 
 # second init refuses to clobber
 set +e

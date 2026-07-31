@@ -1,9 +1,13 @@
 # Lupaxa makefile-skills project wrapper
 # Copy this file to your project root as Makefile.
+#
+# Library development (this repo): set MAKEFILES_MODE=library and
+# MAKEFILES_DIR=. before including, or use the root Makefile.
 
-SKILLS         ?= python mkdocs
+SKILLS ?= python mkdocs
 MAKEFILES_DIR  ?= .makefiles
 MAKEFILES_REF  ?= head
+MAKEFILES_MODE ?= consumer
 
 # Transport: ssh | https | http
 MAKEFILES_TRANSPORT ?= ssh
@@ -20,11 +24,22 @@ endif
 
 .DEFAULT_GOAL := help
 
-.PHONY: init install update help doctor version bump-dev bump-minor bump-major bump-rc release bump-final show-version-flow status
+.PHONY: init install update help doctor version bump-dev bump-minor bump-major bump-rc release bump-final show-version-flow status completion completion-path print-targets
 
 # -----------------------------------------------------------------------------
 # Lifecycle
 # -----------------------------------------------------------------------------
+
+ifeq ($(MAKEFILES_MODE),library)
+
+init install:
+	@echo "This repository hosts the skills library under skills/."
+	@echo "No clone is required. Consumers should copy templates/Makefile."
+
+update:
+	@echo "Library mode: update skills with git in this repository (not make update)."
+
+else
 
 init install:
 	@set -e; \
@@ -32,8 +47,9 @@ init install:
 		echo "ERROR: $(MAKEFILES_DIR) already exists. Use 'make update' or remove it first." >&2; \
 		exit 2; \
 	fi; \
-	echo "==> Cloning $(MAKEFILES_REPO) into $(MAKEFILES_DIR)"; \
-	if ! git clone "$(MAKEFILES_REPO)" "$(MAKEFILES_DIR)" || ! $(MAKE) --no-print-directory _makefiles-checkout; then \
+	echo "==> Cloning skills from $(MAKEFILES_REPO) into $(MAKEFILES_DIR)"; \
+	if ! git clone --filter=blob:none --sparse "$(MAKEFILES_REPO)" "$(MAKEFILES_DIR)" \
+		|| ! $(MAKE) --no-print-directory _makefiles-checkout; then \
 		echo "==> Removing incomplete $(MAKEFILES_DIR) so 'make init' can be retried" >&2; \
 		rm -rf "$(MAKEFILES_DIR)"; \
 		exit 2; \
@@ -53,6 +69,7 @@ update:
 .PHONY: _makefiles-checkout
 _makefiles-checkout:
 	@set -e; \
+	git -C "$(MAKEFILES_DIR)" sparse-checkout set --no-cone 'skills/**'; \
 	if [ "$(MAKEFILES_REF)" = "head" ]; then \
 		git -C "$(MAKEFILES_DIR)" checkout master; \
 		git -C "$(MAKEFILES_DIR)" pull --ff-only origin master; \
@@ -67,6 +84,8 @@ _makefiles-checkout:
 	fi; \
 	echo "==> makefile skills at $$(git -C "$(MAKEFILES_DIR)" rev-parse --short HEAD) ($(MAKEFILES_REF))"
 
+endif
+
 # -----------------------------------------------------------------------------
 # Help / missing-skills guards
 # -----------------------------------------------------------------------------
@@ -75,11 +94,19 @@ help:
 	@echo "$(or $(PROJECT_NAME),$(notdir $(CURDIR))) Makefile"
 	@echo
 	@echo "Lifecycle:"
-	@echo "  init / install      Clone makefile skills into $(MAKEFILES_DIR)"
+ifeq ($(MAKEFILES_MODE),library)
+	@echo "  init / install      (library mode — skills/ is this repository)"
+	@echo "  update              (library mode — use git in this repository)"
+else
+	@echo "  init / install      Clone skills/ into $(MAKEFILES_DIR) (sparse checkout)"
 	@echo "  update              Refresh skills to MAKEFILES_REF ($(MAKEFILES_REF))"
+endif
+	@echo "  completion          Print bash completion script (eval \"\$$(make -s completion)\")"
+	@echo "  transport           $(MAKEFILES_TRANSPORT) -> $(MAKEFILES_REPO)"
+	@echo
+	@echo "Status:"
 	@echo "  status              Show project, version, Git, and enabled-skill status"
 	@echo "  doctor              Run all doctors (lifecycle + versioning + enabled skills)"
-	@echo "  transport           $(MAKEFILES_TRANSPORT) -> $(MAKEFILES_REPO)"
 	@echo
 	@if [ ! -f "$(MAKEFILES_DIR)/skills/versioning.mk" ]; then \
 		echo "Skills not installed. Run: make init"; \
@@ -93,11 +120,11 @@ help:
 
 # Diagnose clone, versioning, and each enabled skill. Exits non-zero on failures.
 doctor:
-	@set +e; \
-	failures=0; \
+	@failures=0; \
 	printf '%s\n' "$(or $(PROJECT_NAME),$(notdir $(CURDIR))) Doctor"; \
 	printf '%s\n' "========================================"; \
 	printf '\nLifecycle:\n'; \
+	printf '  %-22s %s\n' "Mode:" "$(MAKEFILES_MODE)"; \
 	printf '  %-22s %s\n' "Transport:" "$(MAKEFILES_TRANSPORT)"; \
 	printf '  %-22s %s\n' "Repository URL:" "$(MAKEFILES_REPO)"; \
 	printf '  %-22s %s\n' "Ref:" "$(MAKEFILES_REF)"; \
@@ -107,7 +134,14 @@ doctor:
 		printf '  %-22s %s\n' "git:" "[MISSING] git"; \
 		failures=$$((failures + 1)); \
 	fi; \
-	if [ -d "$(MAKEFILES_DIR)/.git" ]; then \
+	if [ "$(MAKEFILES_MODE)" = "library" ]; then \
+		if [ -f "$(MAKEFILES_DIR)/skills/versioning.mk" ]; then \
+			printf '  %-22s %s\n' "Skills tree:" "[OK] $(MAKEFILES_DIR)/skills"; \
+		else \
+			printf '  %-22s %s\n' "Skills tree:" "[MISSING] $(MAKEFILES_DIR)/skills/versioning.mk"; \
+			failures=$$((failures + 1)); \
+		fi; \
+	elif [ -d "$(MAKEFILES_DIR)/.git" ]; then \
 		printf '  %-22s %s\n' "Skills clone:" "[OK] $(MAKEFILES_DIR)"; \
 	elif [ -e "$(MAKEFILES_DIR)" ]; then \
 		printf '  %-22s %s\n' "Skills clone:" "[INVALID] $(MAKEFILES_DIR) exists but is not a git clone"; \
@@ -135,12 +169,12 @@ doctor:
 		echo "Doctor found $$failures issue(s). Run: make init" >&2; \
 		exit 2; \
 	fi; \
-	$(MAKE) --no-print-directory doctor-versioning; \
-	ver_rc=$$?; \
+	ver_rc=0; \
+	$(MAKE) --no-print-directory doctor-versioning || ver_rc=$$?; \
 	if [ $$ver_rc -ne 0 ]; then failures=$$((failures + 1)); fi; \
 	for s in $(SKILLS); do \
-		$(MAKE) --no-print-directory $$s-doctor; \
-		skill_rc=$$?; \
+		skill_rc=0; \
+		$(MAKE) --no-print-directory $$s-doctor || skill_rc=$$?; \
 		if [ $$skill_rc -ne 0 ]; then failures=$$((failures + 1)); fi; \
 	done; \
 	echo; \
@@ -149,6 +183,35 @@ doctor:
 		exit 1; \
 	fi; \
 	echo "Doctor: all checks passed."
+
+# Bash completion for make targets (including skill includes).
+# Usage: eval "$(make -s completion)"   or   source "$(make -s completion-path)"
+completion:
+	@completion_file="$(MAKEFILES_DIR)/skills/completion/bash"; \
+	if [ ! -f "$$completion_file" ]; then \
+		echo "ERROR: completion script not found: $$completion_file" >&2; \
+		echo "Run: make init (or use library mode with skills/ present)" >&2; \
+		exit 2; \
+	fi; \
+	cat "$$completion_file"
+
+completion-path:
+	@completion_file="$(MAKEFILES_DIR)/skills/completion/bash"; \
+	if [ ! -f "$$completion_file" ]; then \
+		echo "ERROR: completion script not found: $$completion_file" >&2; \
+		exit 2; \
+	fi; \
+	printf '%s\n' "$$completion_file"
+
+# Targets for shell completion (excludes private _* helpers).
+print-targets:
+	@$(MAKE) -pRrq : 2>/dev/null | awk -F: '/^[a-zA-Z0-9][^\#\/\t=]*:([^=]|$$)/ { \
+		split($$1, names, / /); \
+		for (i in names) { \
+			n = names[i]; \
+			if (n ~ /^[a-zA-Z0-9]/ && n !~ /^_/ && n != "Makefile" && n !~ /\//) print n; \
+		} \
+	}' | sort -u
 
 ifeq ($(wildcard $(MAKEFILES_DIR)/skills/versioning.mk),)
 version bump-dev bump-minor bump-major bump-rc release bump-final show-version-flow status:

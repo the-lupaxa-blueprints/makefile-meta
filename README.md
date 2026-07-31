@@ -8,7 +8,8 @@ workflows.
 1. Copy [`templates/Makefile`](templates/Makefile), or one of the files in
    [`examples/`](examples/), to your project root as `Makefile`.
 2. Add `.makefiles/` to the project's `.gitignore`. Commit the wrapper and
-   `.gitignore`, but not the cloned skills library.
+   `.gitignore`, but not the cloned skills library. `make init` sparse-clones
+   only `skills/` (not this repo's MkDocs site, tests, or examples).
 3. Configure the skills to enable:
 
    ```make
@@ -32,7 +33,14 @@ workflows.
 5. Run `make init`, then `make help`.
 
 Use `make doctor` to verify tools, the skills clone, and skill-specific
-configuration before you start day-to-day work.
+configuration before you start day-to-day work. `status` and `doctor` appear
+under the **Status** section in `make help`.
+
+Enable bash completion for make targets:
+
+```bash
+eval "$(make -s completion)"
+```
 
 Use `make update` to fetch the selected revision again.
 

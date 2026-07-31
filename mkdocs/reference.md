@@ -4,11 +4,12 @@
 
 | Command | Description |
 | --- | --- |
-| `make init` / `make install` | Clone skills into `MAKEFILES_DIR` (default `.makefiles`) |
-| `make update` | Fetch and check out `MAKEFILES_REF` |
+| `make init` / `make install` | Sparse-clone `skills/` into `MAKEFILES_DIR` (default `.makefiles`) |
+| `make update` | Fetch and check out `MAKEFILES_REF` (keeps sparse `skills/` tree) |
 | `make help` | List lifecycle commands and enabled skill help |
-| `make status` | Project / version / Git / skill status (informational; not a versioning command) |
+| `make status` | Project / version / Git / skill status (Status help section) |
 | `make doctor` | Top-level: lifecycle + `doctor-versioning` + each enabled `*-doctor` |
+| `make completion` | Print bash completion snippet for `make` targets |
 
 ### Wrapper variables
 

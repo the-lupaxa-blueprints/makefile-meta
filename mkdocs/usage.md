@@ -15,9 +15,19 @@ missing. You can still run any skill doctor on its own.
 make status
 ```
 
-`make status` is also top-level (listed under Lifecycle, not Versioning):
-informational project, version stage, Git, and sections for enabled skills.
-It does not fail on missing tools.
+`make status` and `make doctor` appear under the **Status** help section
+(always listed, above Versioning). Status is informational (project, version
+stage, Git, enabled skills) and does not fail on missing tools.
+
+## Shell completion
+
+After `make init`, enable bash target completion:
+
+```bash
+eval "$(make -s completion)"
+# or permanently in ~/.bashrc:
+# source /path/to/project/.makefiles/skills/completion/bash
+```
 
 ## Versioning workflow
 

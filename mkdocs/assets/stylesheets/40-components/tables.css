@@ -1,0 +1,14 @@
+/* =============================================================================
+ * Tables
+ * ============================================================================= */
+
+.md-typeset table:not([class]) th {
+  color: var(--lupaxa-white);
+  background-color: var(--lupaxa-blue);
+  border-color: color-mix(in srgb, var(--lupaxa-blue) 85%, var(--lupaxa-white));
+  font-weight: 650;
+}
+
+.md-typeset table:not([class]) th a {
+  color: var(--lupaxa-white);
+}

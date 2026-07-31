@@ -14,7 +14,8 @@
    (or an example from [`examples/`](examples.md)) to your project root as
    `Makefile`.
 2. Add `.makefiles/` to the project's `.gitignore`. Commit the wrapper and
-   `.gitignore`, not the cloned skills library.
+   `.gitignore`, not the cloned skills library. `make init` pulls only
+   `skills/` via sparse checkout (docs/tests/examples stay out of the clone).
 3. Enable optional skills:
 
    ```make

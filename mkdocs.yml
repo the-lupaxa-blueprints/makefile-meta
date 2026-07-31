@@ -112,6 +112,7 @@ extra_css:
   - assets/stylesheets/30-navigation.css
   - assets/stylesheets/40-components/buttons.css
   - assets/stylesheets/40-components/footer.css
+  - assets/stylesheets/40-components/tables.css
   - assets/stylesheets/90-responsive.css
   - assets/stylesheets/95-print.css
   - assets/stylesheets/99-overrides.css

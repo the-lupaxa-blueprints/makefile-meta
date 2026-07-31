@@ -1,0 +1,31 @@
+# makefile-skills bash completion
+# Install:
+#   source .makefiles/skills/completion/bash
+# Or (from a consumer / this library):
+#   eval "$(make -s completion)"
+
+_makefile_skills_completions() {
+  local cur opts
+  COMPREPLY=()
+  cur="${COMP_WORDS[COMP_CWORD]}"
+
+  # Prefer the project's print-targets helper (honours includes / SKILLS).
+  if opts="$(make -s print-targets 2>/dev/null)" && [ -n "${opts}" ]; then
+    :
+  else
+    # Fallback: parse Make's database directly.
+    opts="$(make -qp 2>/dev/null | awk -F: '/^[a-zA-Z0-9][^#\/\t=]*:([^=]|$)/ {
+      split($1, names, / /)
+      for (i in names) {
+        n = names[i]
+        if (n ~ /^[a-zA-Z0-9]/ && n !~ /^_/ && n != "Makefile" && n !~ /\//) print n
+      }
+    }' | sort -u)"
+  fi
+
+  # shellcheck disable=SC2207
+  COMPREPLY=($(compgen -W "${opts}" -- "${cur}"))
+  return 0
+}
+
+complete -o default -F _makefile_skills_completions make

@@ -3,17 +3,21 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Bare repo whose master/HEAD match REPO_ROOT HEAD so head→master checkout
-# in tests sees the same commit as the worktree (not upstream master).
+# Bare repo whose master/HEAD match the current worktree (tracked + untracked)
+# so head→master checkout in tests sees the same tree as the developer.
+# Prefer this over `git stash create -u`, which can omit untracked files.
 makefiles_bare_repo() {
   local dest="$1"
-  local head_commit
-  head_commit="$(git -C "$REPO_ROOT" stash create --include-untracked 2>/dev/null || true)"
-  if [ -z "$head_commit" ]; then
-    head_commit="$(git -C "$REPO_ROOT" rev-parse HEAD)"
-  fi
+  local head_commit tmp_index tree
+  tmp_index="$(mktemp)"
+  GIT_INDEX_FILE="$tmp_index" git -C "$REPO_ROOT" read-tree HEAD
+  GIT_INDEX_FILE="$tmp_index" git -C "$REPO_ROOT" add -A
+  tree="$(GIT_INDEX_FILE="$tmp_index" git -C "$REPO_ROOT" write-tree)"
+  head_commit="$(git -C "$REPO_ROOT" commit-tree "$tree" -p HEAD -m "test worktree snapshot")"
+  rm -f "$tmp_index"
   git clone --bare "$REPO_ROOT" "$dest"
-  git --git-dir="$dest" update-ref refs/heads/master "$head_commit"
+  # Make the snapshot reachable in the bare repo (not only via local object hardlinks).
+  git -C "$REPO_ROOT" push -q "$dest" "$head_commit":refs/heads/master
   git --git-dir="$dest" symbolic-ref HEAD refs/heads/master
 }
 

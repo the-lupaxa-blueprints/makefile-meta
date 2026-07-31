@@ -1,0 +1,81 @@
+# Lupaxa makefile-skills project wrapper
+# Copy this file to your project root as Makefile.
+
+SKILLS         ?=
+MAKEFILES_DIR  ?= .makefiles
+MAKEFILES_REPO ?= git@github.com:the-lupaxa-blueprints/makefile-meta.git
+MAKEFILES_REF  ?= head
+
+.DEFAULT_GOAL := help
+
+.PHONY: init install update help version bump-dev bump-minor bump-major bump-rc release bump-final show-version-flow status
+
+# -----------------------------------------------------------------------------
+# Lifecycle
+# -----------------------------------------------------------------------------
+
+init install:
+	@set -e; \
+	if [ -e "$(MAKEFILES_DIR)" ]; then \
+		echo "ERROR: $(MAKEFILES_DIR) already exists. Use 'make update' or remove it first." >&2; \
+		exit 2; \
+	fi; \
+	echo "==> Cloning $(MAKEFILES_REPO) into $(MAKEFILES_DIR)"; \
+	git clone "$(MAKEFILES_REPO)" "$(MAKEFILES_DIR)"; \
+	$(MAKE) --no-print-directory _makefiles-checkout
+
+update:
+	@set -e; \
+	if [ ! -d "$(MAKEFILES_DIR)/.git" ]; then \
+		echo "ERROR: $(MAKEFILES_DIR) is not a git clone. Run: make init" >&2; \
+		exit 2; \
+	fi; \
+	echo "==> Updating makefile skills in $(MAKEFILES_DIR) (ref=$(MAKEFILES_REF))"; \
+	git -C "$(MAKEFILES_DIR)" fetch --tags origin; \
+	git -C "$(MAKEFILES_DIR)" fetch origin; \
+	$(MAKE) --no-print-directory _makefiles-checkout
+
+.PHONY: _makefiles-checkout
+_makefiles-checkout:
+	@set -e; \
+	if [ "$(MAKEFILES_REF)" = "head" ]; then \
+		git -C "$(MAKEFILES_DIR)" checkout master; \
+		git -C "$(MAKEFILES_DIR)" pull --ff-only origin master; \
+	else \
+		git -C "$(MAKEFILES_DIR)" checkout "$(MAKEFILES_REF)"; \
+	fi; \
+	echo "==> makefile skills at $$(git -C "$(MAKEFILES_DIR)" rev-parse --short HEAD) ($(MAKEFILES_REF))"
+
+# -----------------------------------------------------------------------------
+# Help / missing-skills guards
+# -----------------------------------------------------------------------------
+
+help:
+	@echo "$(or $(PROJECT_NAME),$(notdir $(CURDIR))) Makefile"
+	@echo
+	@echo "Lifecycle:"
+	@echo "  init / install      Clone makefile skills into $(MAKEFILES_DIR)"
+	@echo "  update              Refresh skills to MAKEFILES_REF ($(MAKEFILES_REF))"
+	@echo
+	@if [ ! -f "$(MAKEFILES_DIR)/skills/versioning.mk" ]; then \
+		echo "Skills not installed. Run: make init"; \
+		echo; \
+	else \
+		$(MAKE) --no-print-directory help-versioning; \
+		for s in $(SKILLS); do \
+			$(MAKE) --no-print-directory help-$$s; \
+		done; \
+	fi
+
+ifeq ($(wildcard $(MAKEFILES_DIR)/skills/versioning.mk),)
+version bump-dev bump-minor bump-major bump-rc release bump-final show-version-flow status:
+	@echo "ERROR: makefile skills not installed. Run: make init" >&2
+	@exit 2
+endif
+
+# -----------------------------------------------------------------------------
+# Skills includes
+# -----------------------------------------------------------------------------
+
+-include $(MAKEFILES_DIR)/skills/versioning.mk
+$(foreach s,$(SKILLS),$(eval -include $(MAKEFILES_DIR)/skills/$(s).mk))

@@ -10,10 +10,10 @@ site_description: >-
 
 site_author: The Lupaxa Project
 
-site_url: https://the-lupaxa-blueprints.github.io/makefile-skills/
+site_url: https://makefile-skills.thelupaxaproject.org/
 
 repo_name: the-lupaxa-blueprints/makefile-skills
-repo_url: https://github.com/the-lupaxa-blueprints/makefile-skills
+repo_url: https://github.coc/the-lupaxa-blueprints/makefile-skills
 
 extra:
   generator: false

@@ -10,6 +10,11 @@ workflows.
 2. Add `.makefiles/` to the project's `.gitignore`. Commit the wrapper and
    `.gitignore`, but not the cloned skills library. `make init` sparse-clones
    only `skills/` (not this repo's MkDocs site, tests, or examples).
+
+   **Important:** sparse checkout is implemented in the **project wrapper**
+   (`Makefile`). If `make init` still materialises `mkdocs/`, `examples/`, etc.,
+   replace your `Makefile` from [`templates/Makefile`](templates/Makefile) (or
+   an [`examples/`](examples/) profile), then `rm -rf .makefiles && make init`.
 3. Configure the skills to enable:
 
    ```make

@@ -25,19 +25,21 @@ out="$(make -C "$CONSUMER" help)"
 assert_contains "$out" "doctor"
 assert_contains "$out" "Lifecycle:"
 assert_contains "$out" "Status:"
-# status/doctor belong under Status, not Versioning
+# Status (status/doctor) is provided by help-versioning, above Versioning
 ver_help="$(make -C "$CONSUMER" help-versioning)"
+assert_contains "$ver_help" "Status:"
+assert_contains "$ver_help" "Versioning:"
 set +e
-printf '%s\n' "$ver_help" | grep -E '^[[:space:]]+status[[:space:]]' >/dev/null
-status_in_versioning=$?
-printf '%s\n' "$out" | awk '/^Status:/{p=1;next} /^[A-Za-z]/{if(p&&$0!~/^Status:/)exit} p' | grep -E '^[[:space:]]+status[[:space:]]' >/dev/null
-status_in_status=$?
-printf '%s\n' "$out" | awk '/^Status:/{p=1;next} /^[A-Za-z]/{if(p&&$0!~/^Status:/)exit} p' | grep -E '^[[:space:]]+doctor[[:space:]]' >/dev/null
-doctor_in_status=$?
+printf '%s\n' "$ver_help" | awk '/^Versioning:/{p=1;next} /^[A-Za-z]/{if(p)exit} p' | grep -E '^[[:space:]]+status[[:space:]]' >/dev/null
+status_under_versioning=$?
+printf '%s\n' "$ver_help" | awk '/^Status:/{p=1;next} /^[A-Za-z]/{if(p&&$0!~/^Status:/)exit} p' | grep -E '^[[:space:]]+status[[:space:]]' >/dev/null
+status_under_status=$?
+printf '%s\n' "$ver_help" | awk '/^Status:/{p=1;next} /^[A-Za-z]/{if(p&&$0!~/^Status:/)exit} p' | grep -E '^[[:space:]]+doctor[[:space:]]' >/dev/null
+doctor_under_status=$?
 set -e
-test "$status_in_versioning" -ne 0
-test "$status_in_status" -eq 0
-test "$doctor_in_status" -eq 0
+test "$status_under_versioning" -ne 0
+test "$status_under_status" -eq 0
+test "$doctor_under_status" -eq 0
 
 # completion script is part of the sparse skills tree
 test -f "$CONSUMER/.makefiles/skills/completion/bash"

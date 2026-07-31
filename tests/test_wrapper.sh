@@ -52,6 +52,9 @@ test ! -e "$CONSUMER/.makefiles/overrides"
 test ! -e "$CONSUMER/.makefiles/examples"
 test ! -e "$CONSUMER/.makefiles/tests"
 test ! -e "$CONSUMER/.makefiles/mkdocs.yml"
+# Top-level of .makefiles must be skills only (.git is hidden / excluded)
+top_level="$(find "$CONSUMER/.makefiles" -mindepth 1 -maxdepth 1 ! -name .git | sort)"
+test "$top_level" = "$CONSUMER/.makefiles/skills"
 
 # second init refuses to clobber
 set +e

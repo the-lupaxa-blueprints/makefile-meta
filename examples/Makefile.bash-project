@@ -3,8 +3,20 @@
 
 SKILLS         ?= bash
 MAKEFILES_DIR  ?= .makefiles
-MAKEFILES_REPO ?= git@github.com:the-lupaxa-blueprints/makefile-meta.git
 MAKEFILES_REF  ?= head
+
+# Transport: ssh | https | http
+MAKEFILES_TRANSPORT ?= ssh
+MAKEFILES_REPO_SSH  ?= git@github.com:the-lupaxa-blueprints/makefile-meta.git
+MAKEFILES_REPO_HTTP ?= https://github.com/the-lupaxa-blueprints/makefile-meta.git
+
+ifeq ($(MAKEFILES_TRANSPORT),ssh)
+MAKEFILES_REPO ?= $(MAKEFILES_REPO_SSH)
+else ifneq ($(filter $(MAKEFILES_TRANSPORT),https http),)
+MAKEFILES_REPO ?= $(MAKEFILES_REPO_HTTP)
+else
+$(error MAKEFILES_TRANSPORT must be ssh, https, or http (got '$(MAKEFILES_TRANSPORT)'))
+endif
 
 .DEFAULT_GOAL := help
 
@@ -65,6 +77,7 @@ help:
 	@echo "Lifecycle:"
 	@echo "  init / install      Clone makefile skills into $(MAKEFILES_DIR)"
 	@echo "  update              Refresh skills to MAKEFILES_REF ($(MAKEFILES_REF))"
+	@echo "  transport           $(MAKEFILES_TRANSPORT) -> $(MAKEFILES_REPO)"
 	@echo
 	@if [ ! -f "$(MAKEFILES_DIR)/skills/versioning.mk" ]; then \
 		echo "Skills not installed. Run: make init"; \

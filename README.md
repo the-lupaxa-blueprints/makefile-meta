@@ -17,7 +17,19 @@ workflows.
 
    Versioning is always available. Optional skills are `python`, `mkdocs`, and
    `bash`.
-4. Run `make init`, then `make help`.
+4. Choose clone transport (`ssh` default, or `https` / `http`):
+
+   ```make
+   MAKEFILES_TRANSPORT ?= https
+   MAKEFILES_REPO_SSH  ?= git@github.com:the-lupaxa-blueprints/makefile-meta.git
+   MAKEFILES_REPO_HTTP ?= https://github.com/the-lupaxa-blueprints/makefile-meta.git
+   ```
+
+   `MAKEFILES_TRANSPORT` selects which of the two URLs is used. Override
+   `MAKEFILES_REPO` directly only when you need a one-off (for example a
+   local path).
+
+5. Run `make init`, then `make help`.
 
 Use `make update` to fetch the selected revision again.
 

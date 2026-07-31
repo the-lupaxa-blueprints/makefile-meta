@@ -1,7 +1,7 @@
 # Examples
 
-Ready-made wrappers live in [`examples/`](https://github.com/the-lupaxa-blueprints/makefile-meta/tree/master/examples).
-Each file is a copy of [`templates/Makefile`](https://github.com/the-lupaxa-blueprints/makefile-meta/blob/master/templates/Makefile)
+Ready-made wrappers live in [`examples/`](https://github.com/the-lupaxa-blueprints/makefile-skills/tree/master/examples).
+Each file is a copy of [`templates/Makefile`](https://github.com/the-lupaxa-blueprints/makefile-skills/blob/master/templates/Makefile)
 with only the `SKILLS` line changed.
 
 | File | `SKILLS` | Use when |

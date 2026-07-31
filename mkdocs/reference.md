@@ -18,8 +18,8 @@
 | `SKILLS` | _(empty)_ | Optional skills: `python`, `mkdocs`, `bash` |
 | `MAKEFILES_DIR` | `.makefiles` | Clone location (gitignored in consumers) |
 | `MAKEFILES_TRANSPORT` | `ssh` | `ssh`, `https`, or `http` |
-| `MAKEFILES_REPO_SSH` | `git@github.com:the-lupaxa-blueprints/makefile-meta.git` | SSH URL |
-| `MAKEFILES_REPO_HTTP` | `https://github.com/the-lupaxa-blueprints/makefile-meta.git` | HTTPS URL |
+| `MAKEFILES_REPO_SSH` | `git@github.com:the-lupaxa-blueprints/makefile-skills.git` | SSH URL |
+| `MAKEFILES_REPO_HTTP` | `https://github.com/the-lupaxa-blueprints/makefile-skills.git` | HTTPS URL |
 | `MAKEFILES_REPO` | _(derived)_ | Selected URL; override for one-offs |
 | `MAKEFILES_REF` | `head` | `head` → tip of `master`, or a tag such as `v1.0.0` |
 
@@ -134,6 +134,6 @@ overrides/                      Material theme overrides
 
 ## Adding a language skill
 
-Copy [`skills/_template.language.mk`](https://github.com/the-lupaxa-blueprints/makefile-meta/blob/master/skills/_template.language.mk)
+Copy [`skills/_template.language.mk`](https://github.com/the-lupaxa-blueprints/makefile-skills/blob/master/skills/_template.language.mk)
 to `skills/<id>.mk` (for example `go.mk`), replace `lang` / `Lang`, implement the stub
 targets, then enable with `SKILLS ?= go`. See the checklist in the template header.

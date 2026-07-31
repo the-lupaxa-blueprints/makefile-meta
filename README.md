@@ -1,4 +1,10 @@
-# makefile-skills
+<p align="center">
+    <a href="https://github.com/the-lupaxa-blueprints">
+        <img src="https://raw.githubusercontent.com/the-lupaxa-project/brand-assets/master/logos/organisations/the-lupaxa-blueprints/readme-logo.png" alt="Organisation Logo" />
+    </a>
+</p>
+
+<h1 align="center">Makefile Skills</h1>
 
 Reusable Makefile skills for project versioning, Python, MkDocs, and Bash
 workflows.
@@ -29,8 +35,8 @@ workflows.
 
    ```make
    MAKEFILES_TRANSPORT ?= https
-   MAKEFILES_REPO_SSH  ?= git@github.com:the-lupaxa-blueprints/makefile-meta.git
-   MAKEFILES_REPO_HTTP ?= https://github.com/the-lupaxa-blueprints/makefile-meta.git
+   MAKEFILES_REPO_SSH  ?= git@github.com:the-lupaxa-blueprints/makefile-skills.git
+   MAKEFILES_REPO_HTTP ?= https://github.com/the-lupaxa-blueprints/makefile-skills.git
    ```
 
    `MAKEFILES_TRANSPORT` selects which of the two URLs is used. Override
@@ -98,3 +104,7 @@ make mkdocs-serve   # requires SKILLS including mkdocs, or: python -m mkdocs ser
 ```
 
 Source lives in `mkdocs/`; config is `mkdocs.yml` at the repository root.
+
+<a href="https://github.com/the-lupaxa-project">
+    <img src="https://raw.githubusercontent.com/the-lupaxa-project/brand-assets/master/logos/components/footer-for-child-orgs.svg" alt="The Lupaxa Project Footer" width="100%" />
+</a>

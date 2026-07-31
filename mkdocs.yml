@@ -10,13 +10,18 @@ site_description: >-
 
 site_author: The Lupaxa Project
 
-site_url: https://the-lupaxa-blueprints.github.io/makefile-meta/
+site_url: https://the-lupaxa-blueprints.github.io/makefile-skills/
 
-repo_name: the-lupaxa-blueprints/makefile-meta
-repo_url: https://github.com/the-lupaxa-blueprints/makefile-meta
+repo_name: the-lupaxa-blueprints/makefile-skills
+repo_url: https://github.com/the-lupaxa-blueprints/makefile-skills
 
 extra:
   generator: false
+  start_year: 2025
+  footer_name: The Lupaxa Project
+  footer_taglines:
+    - Where exploration meets precision.
+    - Where the untamed meets the engineered.
   # Counter.dev analytics (omit counter_dev_id to disable).
   # Create a site at https://counter.dev and set the id below.
   # counter_dev_id: <uuid>
@@ -122,10 +127,5 @@ extra_javascript:
   - assets/javascript/header-active-nav.js
 
 # =============================================================================
-# Copyright
+# Copyright (rendered by overrides/partials/copyright.html; year set in-browser)
 # =============================================================================
-
-copyright: >
-  <span class="footer-copyright">© 2026 <strong>The Lupaxa Project</strong>. All rights reserved.</span>
-  <span class="footer-tagline">Where exploration meets precision.</span>
-  <span class="footer-tagline">Where the untamed meets the engineered.</span>

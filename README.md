@@ -22,7 +22,9 @@ workflows.
    ```
 
    Versioning is always available. Optional skills are `python`, `mkdocs`, and
-   `bash`.
+   `bash`. To add another language, copy
+   [`skills/_template.language.mk`](skills/_template.language.mk) to
+   `skills/<id>.mk` and follow the checklist in that file.
 4. Choose clone transport (`ssh` default, or `https` / `http`):
 
    ```make

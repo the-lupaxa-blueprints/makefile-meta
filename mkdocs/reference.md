@@ -122,11 +122,18 @@ Enable with `SKILLS ?= bash`.
 ## Repository layout (this library)
 
 ```text
-templates/Makefile     Canonical consumer wrapper
-examples/              Wrapper profiles (versioning, python, docs, bash)
-skills/                Skill fragments (.mk) and bash helper
-mkdocs/                Documentation source (this site)
-mkdocs.yml             MkDocs configuration
-tests/                 Shell integration tests
-overrides/             Material theme overrides
+templates/Makefile              Canonical consumer wrapper
+examples/                       Wrapper profiles (versioning, python, docs, bash)
+skills/                         Skill fragments (.mk) and bash helper
+skills/_template.language.mk    Starter for a new language skill (copy → rename)
+mkdocs/                         Documentation source (this site)
+mkdocs.yml                      MkDocs configuration
+tests/                          Shell integration tests
+overrides/                      Material theme overrides
 ```
+
+## Adding a language skill
+
+Copy [`skills/_template.language.mk`](https://github.com/the-lupaxa-blueprints/makefile-meta/blob/master/skills/_template.language.mk)
+to `skills/<id>.mk` (for example `go.mk`), replace `lang` / `Lang`, implement the stub
+targets, then enable with `SKILLS ?= go`. See the checklist in the template header.

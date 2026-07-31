@@ -10,19 +10,7 @@ MAKEFILES_REF ?= head
 MAKEFILES_TRANSPORT ?= ssh
 SKILLS ?=
 
-.PHONY: \
-	bump-dev \
-	bump-final \
-	bump-major \
-	bump-minor \
-	bump-rc \
-	doctor \
-	doctor-versioning \
-	help-versioning \
-	release \
-	show-version-flow \
-	status \
-	version
+.PHONY: bump-dev bump-final bump-major bump-minor bump-rc doctor doctor-versioning help-versioning release show-version-flow status version
 
 # Status is always-on (printed before Versioning) so it appears even when the
 # consumer wrapper's help text is outdated.

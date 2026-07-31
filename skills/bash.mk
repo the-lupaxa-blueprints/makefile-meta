@@ -14,16 +14,7 @@ SHELLCHECK_FLAGS ?=
 
 STATUS_FRAGMENTS += status-bash
 
-.PHONY: \
-	help-bash \
-	status-bash \
-	bash-doctor \
-	bash-list-scripts \
-	bash-syntax \
-	bash-shellcheck \
-	bash-lint \
-	bash-test \
-	bash-check
+.PHONY: help-bash status-bash bash-doctor bash-list-scripts bash-syntax bash-shellcheck bash-lint bash-test bash-check
 
 help-bash:
 	@echo "Bash:"

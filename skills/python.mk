@@ -14,27 +14,7 @@ PYPROJECT_FILE ?= pyproject.toml
 
 STATUS_FRAGMENTS += status-python
 
-.PHONY: \
-	help-python \
-	status-python \
-	python-doctor \
-	python-install-dev \
-	python-install-test \
-	python-lint \
-	python-check-style \
-	python-check-diff \
-	python-check-diff-all \
-	python-format \
-	python-format-diff \
-	python-type \
-	python-test \
-	python-test-cov \
-	python-check \
-	python-check-all \
-	python-audit \
-	python-build \
-	python-publish \
-	python-clean
+.PHONY: help-python status-python python-doctor python-install-dev python-install-test python-lint python-check-style python-check-diff python-check-diff-all python-format python-format-diff python-type python-test python-test-cov python-check python-check-all python-audit python-build python-publish python-clean
 
 help-python:
 	@echo "Python:"

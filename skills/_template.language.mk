@@ -41,15 +41,7 @@ TEST_DIR ?= tests
 
 STATUS_FRAGMENTS += status-lang
 
-.PHONY: \
-	help-lang \
-	status-lang \
-	lang-doctor \
-	lang-lint \
-	lang-test \
-	lang-check \
-	lang-build \
-	lang-clean
+.PHONY: help-lang status-lang lang-doctor lang-lint lang-test lang-check lang-build lang-clean
 
 help-lang:
 	@echo "Lang:"

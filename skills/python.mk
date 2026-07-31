@@ -17,6 +17,7 @@ STATUS_FRAGMENTS += status-python
 .PHONY: \
 	help-python \
 	status-python \
+	python-doctor \
 	python-install-dev \
 	python-install-test \
 	python-lint \
@@ -37,6 +38,7 @@ STATUS_FRAGMENTS += status-python
 
 help-python:
 	@echo "Python:"
+	@echo "  python-doctor       Check Python tools and project layout"
 	@echo "  python-install-dev  Install editable with dev extras"
 	@echo "  python-install-test Install editable with test extras"
 	@echo "  python-lint         Ruff lint + format check"
@@ -101,6 +103,43 @@ status-python:
 	else \
 		printf '  %-22s %s\n' "pytest:" "[MISSING] $(PYTEST)"; \
 	fi
+
+python-doctor:
+	@failures=0; \
+	printf '\nPython doctor:\n'; \
+	if [ -f "$(PYPROJECT_FILE)" ]; then \
+		printf '  %-22s %s\n' "Configuration:" "[OK] $(PYPROJECT_FILE)"; \
+	else \
+		printf '  %-22s %s\n' "Configuration:" "[MISSING] $(PYPROJECT_FILE)"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	if [ -d "$(SRC_DIR)" ]; then \
+		printf '  %-22s %s\n' "Source directory:" "[OK] $(SRC_DIR)"; \
+	else \
+		printf '  %-22s %s\n' "Source directory:" "[MISSING] $(SRC_DIR)"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	if [ -d "$(TEST_DIR)" ]; then \
+		printf '  %-22s %s\n' "Test directory:" "[OK] $(TEST_DIR)"; \
+	else \
+		printf '  %-22s %s\n' "Test directory:" "[MISSING] $(TEST_DIR)"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	for tool_pair in "Python:$(PYTHON)" "Ruff:$(RUFF)" "mypy:$(MYPY)" "pytest:$(PYTEST)" "Hatch:$(HATCH)"; do \
+		label="$${tool_pair%%:*}"; \
+		cmd="$${tool_pair#*:}"; \
+		if command -v "$$cmd" >/dev/null 2>&1; then \
+			printf '  %-22s %s\n' "$$label:" "[OK] $$(command -v "$$cmd")"; \
+		else \
+			printf '  %-22s %s\n' "$$label:" "[MISSING] $$cmd"; \
+			failures=$$((failures + 1)); \
+		fi; \
+	done; \
+	if [ "$$failures" -ne 0 ]; then \
+		echo "Python doctor found $$failures issue(s)." >&2; \
+		exit 1; \
+	fi; \
+	echo "Python doctor: OK"
 
 python-install-dev:
 	$(PIP) install -e ".[dev]"

@@ -9,6 +9,7 @@ PROJECT_VERSION := $(shell sed -n 's/^[[:space:]]*current_version[[:space:]]*=[[
 	bump-major \
 	bump-minor \
 	bump-rc \
+	doctor-versioning \
 	help-versioning \
 	release \
 	show-version-flow \
@@ -17,6 +18,7 @@ PROJECT_VERSION := $(shell sed -n 's/^[[:space:]]*current_version[[:space:]]*=[[
 
 help-versioning:
 	@echo "Versioning:"
+	@echo "  status              Show project, version, tool and Git status"
 	@echo "  version             Show the current project version"
 	@echo "  show-version-flow   Show the version stage and valid next steps"
 	@echo "  bump-dev            Start or continue the next patch development cycle"
@@ -25,6 +27,7 @@ help-versioning:
 	@echo "  bump-rc             Start or continue the release candidate cycle"
 	@echo "  release             Publish the current release candidate as stable"
 	@echo "  bump-final          Alias of release"
+	@echo "  doctor-versioning   Check versioning config and tools"
 	@echo
 
 define require_version
@@ -37,6 +40,39 @@ define require_version
 		exit 2; \
 	}
 endef
+
+doctor-versioning:
+	@failures=0; \
+	printf '\nVersioning doctor:\n'; \
+	if [ -f "$(VERSION_FILE)" ]; then \
+		printf '  %-22s %s\n' "Configuration:" "[OK] $(VERSION_FILE)"; \
+	else \
+		printf '  %-22s %s\n' "Configuration:" "[MISSING] $(VERSION_FILE)"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	if [ -n "$(PROJECT_VERSION)" ]; then \
+		printf '  %-22s %s\n' "current_version:" "[OK] $(PROJECT_VERSION)"; \
+	else \
+		printf '  %-22s %s\n' "current_version:" "[MISSING]"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	if command -v "$(BUMP)" >/dev/null 2>&1; then \
+		printf '  %-22s %s\n' "bump-my-version:" "[OK] $$(command -v "$(BUMP)")"; \
+	else \
+		printf '  %-22s %s\n' "bump-my-version:" "[MISSING] $(BUMP)"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	if command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then \
+		printf '  %-22s %s\n' "Git work tree:" "[OK]"; \
+	else \
+		printf '  %-22s %s\n' "Git work tree:" "[MISSING]"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	if [ "$$failures" -ne 0 ]; then \
+		echo "Versioning doctor found $$failures issue(s)." >&2; \
+		exit 1; \
+	fi; \
+	echo "Versioning doctor: OK"
 
 STATUS_FRAGMENTS ?=
 

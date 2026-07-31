@@ -17,6 +17,7 @@ STATUS_FRAGMENTS += status-bash
 .PHONY: \
 	help-bash \
 	status-bash \
+	bash-doctor \
 	bash-list-scripts \
 	bash-syntax \
 	bash-shellcheck \
@@ -26,6 +27,7 @@ STATUS_FRAGMENTS += status-bash
 
 help-bash:
 	@echo "Bash:"
+	@echo "  bash-doctor        Check Bash tools and script discovery"
 	@echo "  bash-list-scripts  List discovered Bash scripts"
 	@echo "  bash-syntax        Validate Bash syntax using bash -n"
 	@echo "  bash-shellcheck    Analyse Bash scripts using ShellCheck"
@@ -78,6 +80,46 @@ status-bash:
 	else \
 		printf '  %-22s %s\n' "ShellCheck:" "[MISSING] $(SHELLCHECK)"; \
 	fi
+
+bash-doctor:
+	@failures=0; \
+	printf '\nBash doctor:\n'; \
+	printf '  %-22s %s\n' "Source directory:" "$(SHELL_SOURCE_DIR)"; \
+	if [ -x "$(SHELL_FILE_FINDER)" ]; then \
+		printf '  %-22s %s\n' "Discovery helper:" "[OK] $(SHELL_FILE_FINDER)"; \
+	else \
+		printf '  %-22s %s\n' "Discovery helper:" "[MISSING] $(SHELL_FILE_FINDER)"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	if command -v file >/dev/null 2>&1; then \
+		printf '  %-22s %s\n' "file command:" "[OK] $$(command -v file)"; \
+	else \
+		printf '  %-22s %s\n' "file command:" "[MISSING] file"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	if command -v "$(BASH)" >/dev/null 2>&1; then \
+		printf '  %-22s %s\n' "Bash:" "[OK] $$(command -v "$(BASH)")"; \
+	else \
+		printf '  %-22s %s\n' "Bash:" "[MISSING] $(BASH)"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	if command -v "$(SHELLCHECK)" >/dev/null 2>&1; then \
+		printf '  %-22s %s\n' "ShellCheck:" "[OK] $$(command -v "$(SHELLCHECK)")"; \
+	else \
+		printf '  %-22s %s\n' "ShellCheck:" "[MISSING] $(SHELLCHECK)"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	set -- $(SHELL_FILES); \
+	if [ "$$#" -gt 0 ]; then \
+		printf '  %-22s %s\n' "Scripts discovered:" "[OK] $$#"; \
+	else \
+		printf '  %-22s %s\n' "Scripts discovered:" "[WARN] 0 — set SHELL_SOURCE_DIR or SHELL_FILES"; \
+	fi; \
+	if [ "$$failures" -ne 0 ]; then \
+		echo "Bash doctor found $$failures issue(s)." >&2; \
+		exit 1; \
+	fi; \
+	echo "Bash doctor: OK"
 
 bash-list-scripts:
 	@$(require_shell_files)

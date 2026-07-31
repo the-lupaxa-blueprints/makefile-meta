@@ -15,6 +15,7 @@ make_consumer "$CONSUMER"
 out="$(make -C "$CONSUMER" help)"
 assert_contains "$out" "init"
 assert_contains "$out" "update"
+assert_contains "$out" "status"
 assert_contains "$out" "make init"
 assert_contains "$out" "transport"
 

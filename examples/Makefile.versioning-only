@@ -20,7 +20,7 @@ endif
 
 .DEFAULT_GOAL := help
 
-.PHONY: init install update help version bump-dev bump-minor bump-major bump-rc release bump-final show-version-flow status
+.PHONY: init install update help doctor version bump-dev bump-minor bump-major bump-rc release bump-final show-version-flow status
 
 # -----------------------------------------------------------------------------
 # Lifecycle
@@ -77,6 +77,8 @@ help:
 	@echo "Lifecycle:"
 	@echo "  init / install      Clone makefile skills into $(MAKEFILES_DIR)"
 	@echo "  update              Refresh skills to MAKEFILES_REF ($(MAKEFILES_REF))"
+	@echo "  status              Show project, version, tool and Git status"
+	@echo "  doctor              Check tools and config for enabled skills"
 	@echo "  transport           $(MAKEFILES_TRANSPORT) -> $(MAKEFILES_REPO)"
 	@echo
 	@if [ ! -f "$(MAKEFILES_DIR)/skills/versioning.mk" ]; then \
@@ -88,6 +90,65 @@ help:
 			$(MAKE) --no-print-directory help-$$s; \
 		done; \
 	fi
+
+# Diagnose clone, versioning, and each enabled skill. Exits non-zero on failures.
+doctor:
+	@set +e; \
+	failures=0; \
+	printf '%s\n' "$(or $(PROJECT_NAME),$(notdir $(CURDIR))) Doctor"; \
+	printf '%s\n' "========================================"; \
+	printf '\nLifecycle:\n'; \
+	printf '  %-22s %s\n' "Transport:" "$(MAKEFILES_TRANSPORT)"; \
+	printf '  %-22s %s\n' "Repository URL:" "$(MAKEFILES_REPO)"; \
+	printf '  %-22s %s\n' "Ref:" "$(MAKEFILES_REF)"; \
+	if command -v git >/dev/null 2>&1; then \
+		printf '  %-22s %s\n' "git:" "[OK] $$(command -v git)"; \
+	else \
+		printf '  %-22s %s\n' "git:" "[MISSING] git"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	if [ -d "$(MAKEFILES_DIR)/.git" ]; then \
+		printf '  %-22s %s\n' "Skills clone:" "[OK] $(MAKEFILES_DIR)"; \
+	elif [ -e "$(MAKEFILES_DIR)" ]; then \
+		printf '  %-22s %s\n' "Skills clone:" "[INVALID] $(MAKEFILES_DIR) exists but is not a git clone"; \
+		failures=$$((failures + 1)); \
+	else \
+		printf '  %-22s %s\n' "Skills clone:" "[MISSING] $(MAKEFILES_DIR) — run: make init"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	if [ -f "$(MAKEFILES_DIR)/skills/versioning.mk" ]; then \
+		printf '  %-22s %s\n' "versioning.mk:" "[OK]"; \
+	else \
+		printf '  %-22s %s\n' "versioning.mk:" "[MISSING]"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	for s in $(SKILLS); do \
+		if [ -f "$(MAKEFILES_DIR)/skills/$$s.mk" ]; then \
+			printf '  %-22s %s\n' "skill $$s:" "[OK]"; \
+		else \
+			printf '  %-22s %s\n' "skill $$s:" "[MISSING] $(MAKEFILES_DIR)/skills/$$s.mk"; \
+			failures=$$((failures + 1)); \
+		fi; \
+	done; \
+	if [ ! -f "$(MAKEFILES_DIR)/skills/versioning.mk" ]; then \
+		echo; \
+		echo "Doctor found $$failures issue(s). Run: make init" >&2; \
+		exit 2; \
+	fi; \
+	$(MAKE) --no-print-directory doctor-versioning; \
+	ver_rc=$$?; \
+	if [ $$ver_rc -ne 0 ]; then failures=$$((failures + 1)); fi; \
+	for s in $(SKILLS); do \
+		$(MAKE) --no-print-directory $$s-doctor; \
+		skill_rc=$$?; \
+		if [ $$skill_rc -ne 0 ]; then failures=$$((failures + 1)); fi; \
+	done; \
+	echo; \
+	if [ "$$failures" -ne 0 ]; then \
+		echo "Doctor found $$failures failing section(s)." >&2; \
+		exit 1; \
+	fi; \
+	echo "Doctor: all checks passed."
 
 ifeq ($(wildcard $(MAKEFILES_DIR)/skills/versioning.mk),)
 version bump-dev bump-minor bump-major bump-rc release bump-final show-version-flow status:

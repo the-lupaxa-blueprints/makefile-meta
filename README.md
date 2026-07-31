@@ -31,6 +31,9 @@ workflows.
 
 5. Run `make init`, then `make help`.
 
+Use `make doctor` to verify tools, the skills clone, and skill-specific
+configuration before you start day-to-day work.
+
 Use `make update` to fetch the selected revision again.
 
 ## Pin the library version

@@ -5,10 +5,11 @@ MKDOCS_PORT   ?= 8000
 
 STATUS_FRAGMENTS += status-mkdocs
 
-.PHONY: help-mkdocs status-mkdocs mkdocs-build mkdocs-serve mkdocs-clean
+.PHONY: help-mkdocs status-mkdocs mkdocs-doctor mkdocs-build mkdocs-serve mkdocs-clean
 
 help-mkdocs:
 	@echo "Documentation (MkDocs):"
+	@echo "  mkdocs-doctor       Check MkDocs config and tools"
 	@echo "  mkdocs-build        Build the static MkDocs site"
 	@echo "  mkdocs-serve        Serve MkDocs with live reload"
 	@echo "  mkdocs-clean        Remove the generated site/ directory"
@@ -21,16 +22,38 @@ help-mkdocs:
 status-mkdocs:
 	@printf '\nDocumentation:\n'
 	@if [ -f "$(MKDOCS_CONFIG)" ]; then \
-		printf '  %-24s %s\n' "Configuration:" "[OK] $(MKDOCS_CONFIG)"; \
+		printf '  %-22s %s\n' "Configuration:" "[OK] $(MKDOCS_CONFIG)"; \
 	else \
-		printf '  %-24s %s\n' "Configuration:" "[MISSING] $(MKDOCS_CONFIG)"; \
+		printf '  %-22s %s\n' "Configuration:" "[MISSING] $(MKDOCS_CONFIG)"; \
 	fi; \
-	printf '  %-24s %s\n' "Serve address:" "$(MKDOCS_HOST):$(MKDOCS_PORT)"; \
+	printf '  %-22s %s\n' "Serve address:" "$(MKDOCS_HOST):$(MKDOCS_PORT)"; \
 	if command -v "$(MKDOCS)" >/dev/null 2>&1; then \
-		printf '  %-24s %s\n' "MkDocs:" "[OK] $$(command -v "$(MKDOCS)")"; \
+		printf '  %-22s %s\n' "MkDocs:" "[OK] $$(command -v "$(MKDOCS)")"; \
 	else \
-		printf '  %-24s %s\n' "MkDocs:" "[MISSING] $(MKDOCS)"; \
+		printf '  %-22s %s\n' "MkDocs:" "[MISSING] $(MKDOCS)"; \
 	fi
+
+mkdocs-doctor:
+	@failures=0; \
+	printf '\nMkDocs doctor:\n'; \
+	if [ -f "$(MKDOCS_CONFIG)" ]; then \
+		printf '  %-22s %s\n' "Configuration:" "[OK] $(MKDOCS_CONFIG)"; \
+	else \
+		printf '  %-22s %s\n' "Configuration:" "[MISSING] $(MKDOCS_CONFIG)"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	printf '  %-22s %s\n' "Serve address:" "$(MKDOCS_HOST):$(MKDOCS_PORT)"; \
+	if command -v "$(MKDOCS)" >/dev/null 2>&1; then \
+		printf '  %-22s %s\n' "MkDocs:" "[OK] $$(command -v "$(MKDOCS)")"; \
+	else \
+		printf '  %-22s %s\n' "MkDocs:" "[MISSING] $(MKDOCS)"; \
+		failures=$$((failures + 1)); \
+	fi; \
+	if [ "$$failures" -ne 0 ]; then \
+		echo "MkDocs doctor found $$failures issue(s)." >&2; \
+		exit 1; \
+	fi; \
+	echo "MkDocs doctor: OK"
 
 mkdocs-build:
 	$(MKDOCS) build --config-file "$(MKDOCS_CONFIG)"

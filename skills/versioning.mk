@@ -45,8 +45,11 @@ help-versioning:
 
 # Top-level doctor lives in skills so `make doctor` works after init/update
 # even if the project wrapper predates the doctor target.
+# Always runs every section (versioning + each enabled skill); exits non-zero
+# only after all sections have reported.
 doctor:
-	@failures=0; \
+	@set +e; \
+	failures=0; \
 	printf '%s\n' "$(or $(PROJECT_NAME),$(notdir $(CURDIR))) Doctor"; \
 	printf '%s\n' "========================================"; \
 	printf '\nLifecycle:\n'; \
@@ -95,12 +98,12 @@ doctor:
 		echo "Doctor found $$failures issue(s). Run: make init" >&2; \
 		exit 2; \
 	fi; \
-	ver_rc=0; \
-	$(MAKE) --no-print-directory doctor-versioning || ver_rc=$$?; \
+	$(MAKE) --no-print-directory doctor-versioning; \
+	ver_rc=$$?; \
 	if [ $$ver_rc -ne 0 ]; then failures=$$((failures + 1)); fi; \
 	for s in $(SKILLS); do \
-		skill_rc=0; \
-		$(MAKE) --no-print-directory $$s-doctor || skill_rc=$$?; \
+		$(MAKE) --no-print-directory $$s-doctor; \
+		skill_rc=$$?; \
 		if [ $$skill_rc -ne 0 ]; then failures=$$((failures + 1)); fi; \
 	done; \
 	echo; \

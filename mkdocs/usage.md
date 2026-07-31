@@ -8,8 +8,9 @@ make doctor
 
 `make doctor` is the top-level check: lifecycle (clone/transport), then
 `doctor-versioning`, then each enabled skill doctor (`python-doctor`,
-`mkdocs-doctor`, `bash-doctor`, …). It exits non-zero when critical items are
-missing. You can still run any skill doctor on its own.
+`mkdocs-doctor`, `bash-doctor`, …). Every section runs even if an earlier one
+fails; the command exits non-zero only after the full report if any section
+had issues. You can still run any skill doctor on its own (those fail fast).
 
 ```bash
 make status

@@ -56,6 +56,7 @@ cat > "$CONSUMER/.bumpversion.toml" <<'TOML'
 current_version = "0.1.0"
 TOML
 
+# Versioning fails (no bump-my-version) but Bash doctor must still run; aggregate at end.
 set +e
 out="$(make -C "$CONSUMER" doctor SKILLS=bash 2>&1)"
 rc=$?
@@ -64,6 +65,30 @@ test "$rc" -ne 0
 assert_contains "$out" "Lifecycle:"
 assert_contains "$out" "Versioning doctor:"
 assert_contains "$out" "Bash doctor:"
+assert_contains "$out" "Doctor found"
+assert_contains "$out" "failing section"
+
+# Multiple skill doctors all run even when versioning fails first.
+mkdir -p "$CONSUMER/mkdocs"
+cat > "$CONSUMER/mkdocs.yml" <<'YML'
+site_name: test
+YML
+set +e
+out="$(make -C "$CONSUMER" doctor SKILLS='bash mkdocs' 2>&1)"
+rc=$?
+set -e
+test "$rc" -ne 0
+assert_contains "$out" "Versioning doctor:"
+assert_contains "$out" "Bash doctor:"
+assert_contains "$out" "MkDocs doctor:"
+# Summary comes after every section
+versioning_line="$(printf '%s\n' "$out" | grep -n 'Versioning doctor:' | head -1 | cut -d: -f1)"
+bash_line="$(printf '%s\n' "$out" | grep -n 'Bash doctor:' | head -1 | cut -d: -f1)"
+mkdocs_line="$(printf '%s\n' "$out" | grep -n 'MkDocs doctor:' | head -1 | cut -d: -f1)"
+summary_line="$(printf '%s\n' "$out" | grep -n 'Doctor found' | head -1 | cut -d: -f1)"
+test "$versioning_line" -lt "$bash_line"
+test "$bash_line" -lt "$mkdocs_line"
+test "$mkdocs_line" -lt "$summary_line"
 
 make -C "$CONSUMER" -n bash-doctor SKILLS=bash >/dev/null
 make -C "$CONSUMER" -n doctor-versioning >/dev/null

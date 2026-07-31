@@ -33,6 +33,10 @@ help-bash:
 	@echo "  bash-test          Run Bash syntax validation and ShellCheck"
 	@echo "  bash-check         Run the complete Bash validation workflow"
 	@echo
+	@echo "  Discovery uses .sh/.bash suffixes, shebang lines, and file(1)"
+	@echo "  (including extensionless commands). Override with SHELL_SOURCE_DIR"
+	@echo "  or SHELL_FILES. The skills clone (.makefiles) is excluded."
+	@echo
 
 define require_shell_files
 	@test -x "$(SHELL_FILE_FINDER)" || { \

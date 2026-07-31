@@ -22,4 +22,11 @@ assert_not_contains "$out" "python-lint"
 
 make -C "$CONSUMER" -n mkdocs-build SKILLS=mkdocs >/dev/null
 
+out="$(make -C "$CONSUMER" -n mkdocs-serve SKILLS=mkdocs MKDOCS_PORT=8001)"
+assert_contains "$out" "8001"
+assert_contains "$out" "--dev-addr"
+
+out="$(make -C "$CONSUMER" help SKILLS=mkdocs)"
+assert_contains "$out" "MKDOCS_PORT"
+
 echo "PASS: test_mkdocs_skill.sh"

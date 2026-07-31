@@ -10,10 +10,13 @@
 # A file is treated as a shell script when at least one of the following is
 # true:
 #
-#   - Its filename ends in .sh.
-#   - Its filename ends in .bash.
-#   - Its first line contains a recognised shell shebang.
-#   - The file command identifies it as a shell script.
+#   - Its filename ends in .sh or .bash.
+#   - The first line is a recognised shell shebang (CRLF-safe).
+#   - file(1) reports a shell/bash/zsh/… script (human description).
+#   - file(1) MIME type is text/x-shellscript.
+#
+# Extensionless commands (for example bin/tool with a bash shebang) are
+# included when shebang or file(1) detection succeeds.
 #
 # Recognised shell interpreters include:
 #
@@ -30,10 +33,10 @@
 #
 # Usage:
 #
-#   scripts/find-shell-files
-#   scripts/find-shell-files scripts
-#   scripts/find-shell-files /path/to/project
-#   scripts/find-shell-files /path/to/project .makefiles
+#   skills/bash/find-shell-files
+#   skills/bash/find-shell-files scripts
+#   skills/bash/find-shell-files /path/to/project
+#   skills/bash/find-shell-files /path/to/project .makefiles
 #
 # =============================================================================
 
@@ -69,10 +72,6 @@ fi
 # -----------------------------------------------------------------------------
 # Temporary Storage
 # -----------------------------------------------------------------------------
-#
-# A temporary file allows the final results to be sorted and de-duplicated.
-#
-# The trap ensures that the temporary file is removed when the script exits.
 
 DISCOVERED_FILES="$(mktemp)"
 
@@ -104,31 +103,51 @@ is_shell_shebang() {
     local first_line
 
     IFS= read -r first_line < "${path}" || true
+    # Strip CR so CRLF shebang lines still match.
+    first_line="${first_line%$'\r'}"
 
     [[ "${first_line}" =~ ^#![[:space:]]*/bin/(ba|da|k|z)?sh([[:space:]]|$) ]] ||
         [[ "${first_line}" =~ ^#![[:space:]]*/usr/bin/(ba|da|k|z)?sh([[:space:]]|$) ]] ||
+        [[ "${first_line}" =~ ^#![[:space:]]*/usr/local/bin/(ba|da|k|z)?sh([[:space:]]|$) ]] ||
+        [[ "${first_line}" =~ ^#![[:space:]]*/opt/homebrew/bin/(ba|da|k|z)?sh([[:space:]]|$) ]] ||
         [[ "${first_line}" =~ ^#![[:space:]]*/usr/bin/env[[:space:]]+(ba|da|k|z)?sh([[:space:]]|$) ]] ||
         [[ "${first_line}" =~ ^#![[:space:]]*/usr/bin/env[[:space:]]+-S[[:space:]]+(ba|da|k|z)?sh([[:space:]]|$) ]]
 }
 
 is_shell_file_type() {
     local path="$1"
-    local description
+    local description mime
 
     description="$(file -b "${path}" 2>/dev/null || true)"
+    mime="$(file -b --mime-type "${path}" 2>/dev/null || true)"
 
-    [[ "${description}" =~ [Ss]hell[[:space:]]script ]]
+    # libmagic MIME (Linux, modern file(1); may be empty on older macOS).
+    if [[ "${mime}" == "text/x-shellscript" ]]; then
+        return 0
+    fi
+
+    # Human-readable descriptions vary by OS / libmagic version.
+    [[ "${description}" =~ [Ss]hell[[:space:]]script ]] ||
+        [[ "${description}" =~ [Bb]ash[[:space:]]script ]] ||
+        [[ "${description}" =~ [Zz]sh[[:space:]]script ]] ||
+        [[ "${description}" =~ [Kk]sh[[:space:]]script ]] ||
+        [[ "${description}" =~ [Dd]ash[[:space:]]script ]] ||
+        [[ "${description}" =~ /bin/(ba|da|k|z)?sh ]] ||
+        [[ "${description}" =~ /usr/bin/env[[:space:]]+(ba|da|k|z)?sh ]] ||
+        [[ "${description}" =~ with[[:space:]]+(ba|da|k|z)?sh[[:space:]]+interpreter ]]
+}
+
+is_shell_script() {
+    local path="$1"
+
+    is_shell_extension "${path}" ||
+        is_shell_shebang "${path}" ||
+        is_shell_file_type "${path}"
 }
 
 # -----------------------------------------------------------------------------
 # Discovery
 # -----------------------------------------------------------------------------
-#
-# The null-delimited find output safely handles paths containing spaces,
-# wildcard characters and most other special characters.
-#
-# Newline characters inside filenames are not supported in the final
-# line-oriented output.
 
 PRUNE_NAMES=(
     .git
@@ -162,9 +181,7 @@ for name in "${PRUNE_NAMES[@]}"; do
 done
 
 while IFS= read -r -d '' path; do
-    if is_shell_extension "${path}" ||
-        is_shell_shebang "${path}" ||
-        is_shell_file_type "${path}"; then
+    if is_shell_script "${path}"; then
         printf '%s\n' "${path}" >> "${DISCOVERED_FILES}"
     fi
 done < <(

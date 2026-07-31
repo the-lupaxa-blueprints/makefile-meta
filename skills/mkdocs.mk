@@ -1,5 +1,7 @@
 MKDOCS        ?= mkdocs
 MKDOCS_CONFIG ?= mkdocs.yml
+MKDOCS_HOST   ?= 127.0.0.1
+MKDOCS_PORT   ?= 8000
 
 STATUS_FRAGMENTS += status-mkdocs
 
@@ -11,6 +13,10 @@ help-mkdocs:
 	@echo "  mkdocs-serve        Serve MkDocs with live reload"
 	@echo "  mkdocs-clean        Remove the generated site/ directory"
 	@echo
+	@echo "  mkdocs-serve uses $(MKDOCS_HOST):$(MKDOCS_PORT) by default."
+	@echo "  Override with MKDOCS_PORT / MKDOCS_HOST, e.g.:"
+	@echo "    make mkdocs-serve MKDOCS_PORT=8001"
+	@echo
 
 status-mkdocs:
 	@printf '\nDocumentation:\n'
@@ -19,6 +25,7 @@ status-mkdocs:
 	else \
 		printf '  %-24s %s\n' "Configuration:" "[MISSING] $(MKDOCS_CONFIG)"; \
 	fi; \
+	printf '  %-24s %s\n' "Serve address:" "$(MKDOCS_HOST):$(MKDOCS_PORT)"; \
 	if command -v "$(MKDOCS)" >/dev/null 2>&1; then \
 		printf '  %-24s %s\n' "MkDocs:" "[OK] $$(command -v "$(MKDOCS)")"; \
 	else \
@@ -29,7 +36,9 @@ mkdocs-build:
 	$(MKDOCS) build --config-file "$(MKDOCS_CONFIG)"
 
 mkdocs-serve:
-	$(MKDOCS) serve --config-file "$(MKDOCS_CONFIG)"
+	$(MKDOCS) serve \
+		--config-file "$(MKDOCS_CONFIG)" \
+		--dev-addr "$(MKDOCS_HOST):$(MKDOCS_PORT)"
 
 mkdocs-clean:
 	rm -rf site

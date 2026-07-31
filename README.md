@@ -57,7 +57,12 @@ Enable `python` for prefixed commands such as `make python-lint`,
 `make python-build`.
 
 Enable `mkdocs` for `make mkdocs-build`, `make mkdocs-serve`, and
-`make mkdocs-clean`.
+`make mkdocs-clean`. Serve defaults to `127.0.0.1:8000`; override per run:
+
+```bash
+make mkdocs-serve MKDOCS_PORT=8001
+make mkdocs-serve MKDOCS_PORT=8002
+```
 
 Enable `bash` for `make bash-list-scripts`, `make bash-syntax`,
 `make bash-shellcheck`, and `make bash-check`.

@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+
+# =============================================================================
+# Shell Script Discovery
+# =============================================================================
+#
+# Discover shell scripts within a repository without relying exclusively on
+# filename extensions.
+#
+# A file is treated as a shell script when at least one of the following is
+# true:
+#
+#   - Its filename ends in .sh.
+#   - Its filename ends in .bash.
+#   - Its first line contains a recognised shell shebang.
+#   - The file command identifies it as a shell script.
+#
+# Recognised shell interpreters include:
+#
+#   - bash
+#   - dash
+#   - ksh
+#   - sh
+#   - zsh
+#
+# Common repository metadata, dependency, virtual-environment and generated
+# directories are excluded from discovery.
+#
+# Usage:
+#
+#   scripts/find-shell-files
+#   scripts/find-shell-files scripts
+#   scripts/find-shell-files /path/to/project
+#
+# =============================================================================
+
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Configuration
+# -----------------------------------------------------------------------------
+
+SEARCH_DIRECTORY="${1:-.}"
+
+# -----------------------------------------------------------------------------
+# Guards
+# -----------------------------------------------------------------------------
+
+if [[ ! -d "${SEARCH_DIRECTORY}" ]]; then
+    printf 'ERROR: shell script search directory not found: %s\n' \
+        "${SEARCH_DIRECTORY}" >&2
+    exit 2
+fi
+
+if ! command -v find >/dev/null 2>&1; then
+    printf 'ERROR: required command not found: find\n' >&2
+    exit 2
+fi
+
+if ! command -v file >/dev/null 2>&1; then
+    printf 'ERROR: required command not found: file\n' >&2
+    exit 2
+fi
+
+# -----------------------------------------------------------------------------
+# Temporary Storage
+# -----------------------------------------------------------------------------
+#
+# A temporary file allows the final results to be sorted and de-duplicated.
+#
+# The trap ensures that the temporary file is removed when the script exits.
+
+DISCOVERED_FILES="$(mktemp)"
+
+cleanup() {
+    rm -f "${DISCOVERED_FILES}"
+}
+
+trap cleanup EXIT
+
+# -----------------------------------------------------------------------------
+# Shell Script Detection
+# -----------------------------------------------------------------------------
+
+is_shell_extension() {
+    local path="$1"
+
+    case "${path}" in
+        *.sh | *.bash)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+is_shell_shebang() {
+    local path="$1"
+    local first_line
+
+    IFS= read -r first_line < "${path}" || true
+
+    [[ "${first_line}" =~ ^#![[:space:]]*/bin/(ba|da|k|z)?sh([[:space:]]|$) ]] ||
+        [[ "${first_line}" =~ ^#![[:space:]]*/usr/bin/(ba|da|k|z)?sh([[:space:]]|$) ]] ||
+        [[ "${first_line}" =~ ^#![[:space:]]*/usr/bin/env[[:space:]]+(ba|da|k|z)?sh([[:space:]]|$) ]] ||
+        [[ "${first_line}" =~ ^#![[:space:]]*/usr/bin/env[[:space:]]+-S[[:space:]]+(ba|da|k|z)?sh([[:space:]]|$) ]]
+}
+
+is_shell_file_type() {
+    local path="$1"
+    local description
+
+    description="$(file -b "${path}" 2>/dev/null || true)"
+
+    [[ "${description}" =~ [Ss]hell[[:space:]]script ]]
+}
+
+# -----------------------------------------------------------------------------
+# Discovery
+# -----------------------------------------------------------------------------
+#
+# The null-delimited find output safely handles paths containing spaces,
+# wildcard characters and most other special characters.
+#
+# Newline characters inside filenames are not supported in the final
+# line-oriented output.
+
+while IFS= read -r -d '' path; do
+    if is_shell_extension "${path}" ||
+        is_shell_shebang "${path}" ||
+        is_shell_file_type "${path}"; then
+        printf '%s\n' "${path}" >> "${DISCOVERED_FILES}"
+    fi
+done < <(
+    find "${SEARCH_DIRECTORY}" \
+        -type d \( \
+            -name .git \
+            -o -name .audit-env \
+            -o -name .cache \
+            -o -name .mypy_cache \
+            -o -name .pytest_cache \
+            -o -name .ruff_cache \
+            -o -name .tox \
+            -o -name .venv \
+            -o -name __pycache__ \
+            -o -name build \
+            -o -name dist \
+            -o -name node_modules \
+            -o -name site \
+            -o -name vendor \
+            -o -name venv \
+        \) -prune \
+        -o -type f -print0
+)
+
+# -----------------------------------------------------------------------------
+# Results
+# -----------------------------------------------------------------------------
+
+sort -u "${DISCOVERED_FILES}"

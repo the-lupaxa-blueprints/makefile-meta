@@ -19,7 +19,7 @@
 - `release` means version promotion; packaging publish is `python-publish`.
 - Use `-include` so missing `.makefiles/` does not break `init` / `help`.
 - Consumer projects commit wrapper + `.gitignore` entry for `.makefiles/` only.
-- Spec: `docs/superpowers/specs/2026-07-31-makefile-skills-design.md`.
+- Spec: `cursor-docs/superpowers/specs/2026-07-31-makefile-skills-design.md`.
 
 ---
 

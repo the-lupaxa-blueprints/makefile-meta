@@ -145,7 +145,7 @@ makefile-meta/
     Makefile.python-docs
     Makefile.bash
   README.md
-  docs/superpowers/specs/...
+  cursor-docs/superpowers/specs/...
 ```
 
 ### Migration of existing content

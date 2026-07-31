@@ -1,0 +1,11 @@
+---
+description: Specs and plans go under cursor-docs/, never docs/
+alwaysApply: true
+---
+
+# Documentation directories
+
+- **`docs/`** is reserved for GitHub / project docs. Do not put agent specs, plans, or process docs there.
+- Write design specs to `cursor-docs/superpowers/specs/`.
+- Write implementation plans to `cursor-docs/superpowers/plans/`.
+- This overrides Superpowers defaults that mention `docs/superpowers/`.

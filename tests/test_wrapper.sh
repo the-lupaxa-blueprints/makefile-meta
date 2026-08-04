@@ -23,11 +23,11 @@ assert_contains "$out" "transport"
 
 # transport selects SSH vs HTTPS URL (MAKEFILES_REPO still overridable)
 out="$(make -C "$CONSUMER" help MAKEFILES_TRANSPORT=ssh)"
-assert_contains "$out" "git@github.com:the-lupaxa-blueprints/makefile-skills.git"
+assert_contains "$out" "git@github.com:the-lupaxa-internal-toolbox/makefile-skills.git"
 out="$(make -C "$CONSUMER" help MAKEFILES_TRANSPORT=https)"
-assert_contains "$out" "https://github.com/the-lupaxa-blueprints/makefile-skills.git"
+assert_contains "$out" "https://github.com/the-lupaxa-internal-toolbox/makefile-skills.git"
 out="$(make -C "$CONSUMER" help MAKEFILES_TRANSPORT=http)"
-assert_contains "$out" "https://github.com/the-lupaxa-blueprints/makefile-skills.git"
+assert_contains "$out" "https://github.com/the-lupaxa-internal-toolbox/makefile-skills.git"
 set +e
 err="$(make -C "$CONSUMER" help MAKEFILES_TRANSPORT=ftp 2>&1)"
 rc=$?

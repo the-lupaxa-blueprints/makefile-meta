@@ -10,7 +10,7 @@
 
 ## Adopt the wrapper
 
-1. Copy [`templates/Makefile`](https://github.com/the-lupaxa-blueprints/makefile-skills/blob/master/templates/Makefile)
+1. Copy [`templates/Makefile`](https://github.com/the-lupaxa-internal-toolbox/makefile-skills/blob/master/templates/Makefile)
    (or an example from [`examples/`](examples.md)) to your project root as
    `Makefile`.
 2. Add `.makefiles/` to the project's `.gitignore`. Commit the wrapper and
@@ -29,8 +29,8 @@
 
    ```make
    MAKEFILES_TRANSPORT ?= https
-   MAKEFILES_REPO_SSH  ?= git@github.com:the-lupaxa-blueprints/makefile-skills.git
-   MAKEFILES_REPO_HTTP ?= https://github.com/the-lupaxa-blueprints/makefile-skills.git
+   MAKEFILES_REPO_SSH  ?= git@github.com:the-lupaxa-internal-toolbox/makefile-skills.git
+   MAKEFILES_REPO_HTTP ?= https://github.com/the-lupaxa-internal-toolbox/makefile-skills.git
    ```
 
 5. Initialise and inspect:

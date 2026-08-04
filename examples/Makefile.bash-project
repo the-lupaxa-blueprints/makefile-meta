@@ -11,8 +11,8 @@ MAKEFILES_MODE ?= consumer
 
 # Transport: ssh | https | http
 MAKEFILES_TRANSPORT ?= ssh
-MAKEFILES_REPO_SSH  ?= git@github.com:the-lupaxa-blueprints/makefile-skills.git
-MAKEFILES_REPO_HTTP ?= https://github.com/the-lupaxa-blueprints/makefile-skills.git
+MAKEFILES_REPO_SSH  ?= git@github.com:the-lupaxa-internal-toolbox/makefile-skills.git
+MAKEFILES_REPO_HTTP ?= https://github.com/the-lupaxa-internal-toolbox/makefile-skills.git
 
 ifeq ($(MAKEFILES_TRANSPORT),ssh)
 MAKEFILES_REPO ?= $(MAKEFILES_REPO_SSH)

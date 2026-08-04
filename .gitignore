@@ -1,4 +1,5 @@
 .worktrees/
 .DS_Store
-cursor-docs/
+# Private Superpowers specs/plans (symlink into Lupaxa cursor-docs vault)
+cursor-docs
 site/

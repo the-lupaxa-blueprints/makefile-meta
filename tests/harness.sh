@@ -46,3 +46,29 @@ assert_not_contains() {
     exit 1
   fi
 }
+
+# Fake bump-my-version: updates .bumpversion.toml current_version only.
+# Usage: install_bump_stub "$PATH_DIR" && export PATH="$PATH_DIR:$PATH"
+install_bump_stub() {
+  local bindir="$1"
+  mkdir -p "$bindir"
+  cat > "$bindir/bump-my-version" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+new=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --new-version) new="${2:-}"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+[ -n "$new" ] || { echo "stub bump-my-version: missing --new-version" >&2; exit 2; }
+[ -f .bumpversion.toml ] || { echo "stub bump-my-version: .bumpversion.toml missing" >&2; exit 2; }
+tmp="$(mktemp)"
+sed "s/^[[:space:]]*current_version[[:space:]]*=[[:space:]]*\".*\"/current_version = \"${new}\"/" \
+  .bumpversion.toml > "$tmp"
+mv "$tmp" .bumpversion.toml
+echo "stub: bumped to $new"
+EOF
+  chmod +x "$bindir/bump-my-version"
+}

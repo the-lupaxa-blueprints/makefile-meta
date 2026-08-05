@@ -12,21 +12,108 @@ CONSUMER="$TMP/consumer"
 make_consumer "$CONSUMER"
 make -C "$CONSUMER" init MAKEFILES_REPO="$BARE"
 
-# Minimal bumpversion file
 cat > "$CONSUMER/.bumpversion.toml" <<'EOF'
 [tool.bumpversion]
 current_version = "1.2.3"
+parse = "(?P<version>.*)"
+serialize = ["{version}"]
+commit = false
+tag = false
+allow_dirty = true
 EOF
 
-out="$(make -C "$CONSUMER" version)"
-assert_contains "$out" "1.2.3"
+STUB_BIN="$TMP/bin"
+install_bump_stub "$STUB_BIN"
+export PATH="$STUB_BIN:$PATH"
 
+set_version() {
+  local v="$1"
+  sed -i.bak "s/^current_version = \".*\"/current_version = \"$v\"/" "$CONSUMER/.bumpversion.toml"
+  rm -f "$CONSUMER/.bumpversion.toml.bak"
+}
+
+assert_version() {
+  local expected="$1"
+  local out file_ver
+  out="$(make -C "$CONSUMER" version)"
+  assert_contains "$out" "$expected"
+  file_ver="$(sed -n 's/^current_version = "\([^"]*\)"/\1/p' "$CONSUMER/.bumpversion.toml")"
+  [ "$file_ver" = "$expected" ] || {
+    echo "ASSERT: .bumpversion.toml has $file_ver, expected $expected" >&2
+    exit 1
+  }
+}
+
+run_bump() {
+  make -C "$CONSUMER" "$1" >/dev/null
+}
+
+assert_bump_fails() {
+  local target="$1"
+  local err rc=0
+  err="$(make -C "$CONSUMER" "$target" 2>&1 >/dev/null)" || rc=$?
+  if [ "$rc" -eq 0 ]; then
+    echo "ASSERT: expected make $target to fail" >&2
+    exit 1
+  fi
+  assert_contains "$err" "ERROR"
+}
+
+# Help lists new flexible bump targets
 out="$(make -C "$CONSUMER" help)"
-assert_contains "$out" "bump-dev"
-assert_contains "$out" "show-version-flow"
+for target in bump-patch bump-minor bump-major bump-dev bump-minor-dev bump-major-dev \
+  bump-rc bump-minor-rc bump-major-rc release; do
+  assert_contains "$out" "$target"
+done
 assert_not_contains "$out" "python-lint"
 
-out="$(make -C "$CONSUMER" show-version-flow)"
-assert_contains "$out" "bump-dev"
+# Happy-path transition matrix
+assert_version "1.2.3"
+
+run_bump bump-patch
+assert_version "1.2.4"
+
+set_version "1.2.3"
+run_bump bump-minor
+assert_version "1.3.0"
+
+set_version "1.2.3"
+run_bump bump-major
+assert_version "2.0.0"
+
+set_version "1.2.3"
+run_bump bump-dev
+assert_version "1.2.4-dev1"
+
+run_bump bump-dev
+assert_version "1.2.4-dev2"
+
+run_bump bump-rc
+assert_version "1.2.4-rc1"
+
+run_bump release
+assert_version "1.2.4"
+
+set_version "1.2.3"
+run_bump bump-minor-dev
+assert_version "1.3.0-dev1"
+
+run_bump bump-minor-rc
+assert_version "1.3.0-rc1"
+
+run_bump release
+assert_version "1.3.0"
+
+# Strict-channel error cases
+set_version "1.2.3"
+assert_bump_fails bump-rc
+
+set_version "1.2.4-dev1"
+assert_bump_fails bump-minor-dev
+assert_bump_fails bump-patch
+assert_bump_fails release
+
+set_version "1.2.4-rc1"
+assert_bump_fails bump-dev
 
 echo "PASS: test_versioning.sh"

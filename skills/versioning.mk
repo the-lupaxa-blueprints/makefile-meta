@@ -141,6 +141,23 @@ define run_version_bump
 	    *) return 1 ;; \
 	  esac; \
 	}; \
+	open_channel() { \
+	  if [ "$$pat" -ge 1 ]; then echo patch; \
+	  elif [ "$$min" -ge 1 ]; then echo minor; \
+	  elif [ "$$maj" -ge 1 ]; then echo major; \
+	  else echo ""; fi; \
+	}; \
+	hint_target() { \
+	  case "$$1-$$2" in \
+	    dev-patch) echo "bump-dev (alias: bump-patch-dev)" ;; \
+	    dev-minor) echo "bump-minor-dev" ;; \
+	    dev-major) echo "bump-major-dev" ;; \
+	    rc-patch) echo "bump-rc (alias: bump-patch-rc)" ;; \
+	    rc-minor) echo "bump-minor-rc" ;; \
+	    rc-major) echo "bump-major-rc" ;; \
+	    *) echo "" ;; \
+	  esac; \
+	}; \
 	next_base() { \
 	  case "$$1" in \
 	    patch) echo "$$maj.$$min.$$((pat + 1))" ;; \
@@ -152,27 +169,55 @@ define run_version_bump
 	case "$$mode" in \
 	  stable) \
 	    if [ "$$stage" != stable ]; then \
-	      echo "ERROR: bump-$$flavour requires a stable version (current: $$current)." >&2; exit 2; \
+	      ofl="$$(open_channel)"; \
+	      if [ "$$stage" = dev ]; then hint="$$(hint_target dev "$$ofl")"; \
+	      else hint="$$(hint_target rc "$$ofl")"; fi; \
+	      if [ -n "$$hint" ]; then \
+	        echo "ERROR: bump-$$flavour requires a stable version (current: $$current). Hint: make $$hint" >&2; \
+	      else \
+	        echo "ERROR: bump-$$flavour requires a stable version (current: $$current)." >&2; \
+	      fi; \
+	      exit 2; \
 	    fi; \
 	    new_version="$$(next_base "$$flavour")" ;; \
 	  dev) \
 	    if [ "$$stage" = rc ]; then \
-	      echo "ERROR: bump-$$flavour-dev cannot run on a release candidate ($$current)." >&2; exit 2; \
+	      ofl="$$(open_channel)"; hint="$$(hint_target rc "$$ofl")"; \
+	      if [ -n "$$hint" ]; then \
+	        echo "ERROR: bump-$$flavour-dev cannot run on a release candidate ($$current). Hint: make $$hint or make release" >&2; \
+	      else \
+	        echo "ERROR: bump-$$flavour-dev cannot run on a release candidate ($$current). Hint: make release" >&2; \
+	      fi; \
+	      exit 2; \
 	    fi; \
 	    if [ "$$stage" = stable ]; then \
 	      nb="$$(next_base "$$flavour")"; new_version="$$nb-dev1"; \
 	    else \
 	      if ! channel_ok "$$flavour"; then \
-	        echo "ERROR: bump-$$flavour-dev does not match open channel for $$current." >&2; exit 2; \
+	        ofl="$$(open_channel)"; hint="$$(hint_target dev "$$ofl")"; \
+	        if [ -n "$$hint" ]; then \
+	          echo "ERROR: bump-$$flavour-dev does not match open channel for $$current. Hint: make $$hint" >&2; \
+	        else \
+	          echo "ERROR: bump-$$flavour-dev does not match open channel for $$current." >&2; \
+	        fi; \
+	        exit 2; \
 	      fi; \
 	      new_version="$$base-dev$$((n + 1))"; \
 	    fi ;; \
 	  rc) \
 	    if [ "$$stage" = stable ]; then \
-	      echo "ERROR: bump-$$flavour-rc expects -devN or matching -rcN (current: $$current)." >&2; exit 2; \
+	      hint="$$(hint_target dev "$$flavour")"; \
+	      echo "ERROR: bump-$$flavour-rc expects -devN or matching -rcN (current: $$current). Hint: make $$hint first" >&2; \
+	      exit 2; \
 	    fi; \
 	    if ! channel_ok "$$flavour"; then \
-	      echo "ERROR: bump-$$flavour-rc does not match open channel for $$current." >&2; exit 2; \
+	      ofl="$$(open_channel)"; hint="$$(hint_target rc "$$ofl")"; \
+	      if [ -n "$$hint" ]; then \
+	        echo "ERROR: bump-$$flavour-rc does not match open channel for $$current. Hint: make $$hint" >&2; \
+	      else \
+	        echo "ERROR: bump-$$flavour-rc does not match open channel for $$current." >&2; \
+	      fi; \
+	      exit 2; \
 	    fi; \
 	    if [ "$$stage" = dev ]; then new_version="$$base-rc1"; \
 	    else new_version="$$base-rc$$((n + 1))"; fi ;; \
@@ -377,8 +422,8 @@ show-version-flow:
 		echo "Stage: development pre-release"; echo; \
 		if [ -n "$$flavour" ]; then \
 			echo "Suggested next steps:"; echo; \
-			printf "  %-16s %-44s (%s)\n" "make $$dev_target" "Continue the development cycle" "$$next_dev"; \
-			printf "  %-16s %-44s (%s)\n" "make $$rc_target" "Promote to the first release candidate" "$$next_rc"; \
+			printf "  %-20s %-44s (%s)\n" "make $$dev_target" "Continue the development cycle" "$$next_dev"; \
+			printf "  %-20s %-44s (%s)\n" "make $$rc_target" "Promote to the first release candidate" "$$next_rc"; \
 		else \
 			echo "No matching channel continues this pre-release ($$base): patch/minor/major bumps require the corresponding X.Y.Z part to be >=1."; \
 		fi; \
@@ -386,18 +431,18 @@ show-version-flow:
 		rc_number="$${current##*-rc}"; next_rc="$$base-rc$$((rc_number + 1))"; \
 		echo "Stage: release candidate"; echo; echo "Suggested next steps:"; echo; \
 		if [ -n "$$flavour" ]; then \
-			printf "  %-16s %-44s (%s)\n" "make $$rc_target" "Continue the release candidate cycle" "$$next_rc"; \
+			printf "  %-20s %-44s (%s)\n" "make $$rc_target" "Continue the release candidate cycle" "$$next_rc"; \
 		else \
 			echo "  (No matching channel continues this pre-release ($$base); further -rc bumps are unavailable.)"; \
 		fi; \
-		printf "  %-16s %-44s (%s)\n" "make release" "Publish the stable release" "$$base"; \
+		printf "  %-20s %-44s (%s)\n" "make release" "Publish the stable release" "$$base"; \
 	else \
 		next_patch_dev="$$next_patch-dev1"; next_minor_dev="$$next_minor-dev1"; next_major_dev="$$next_major-dev1"; \
 		echo "Stage: final / stable release"; echo; echo "Suggested next steps:"; echo; \
-		printf "  %-16s %-44s (%s)\n" "make bump-patch" "Bump to the next stable patch" "$$next_patch"; \
-		printf "  %-16s %-44s (%s)\n" "make bump-minor" "Bump to the next stable minor" "$$next_minor"; \
-		printf "  %-16s %-44s (%s)\n" "make bump-major" "Bump to the next stable major" "$$next_major"; \
-		printf "  %-16s %-44s (%s)\n" "make bump-dev" "Start the next patch development cycle" "$$next_patch_dev"; \
-		printf "  %-16s %-44s (%s)\n" "make bump-minor-dev" "Start the next minor development cycle" "$$next_minor_dev"; \
-		printf "  %-16s %-44s (%s)\n" "make bump-major-dev" "Start the next major development cycle" "$$next_major_dev"; \
+		printf "  %-20s %-44s (%s)\n" "make bump-patch" "Bump to the next stable patch" "$$next_patch"; \
+		printf "  %-20s %-44s (%s)\n" "make bump-minor" "Bump to the next stable minor" "$$next_minor"; \
+		printf "  %-20s %-44s (%s)\n" "make bump-major" "Bump to the next stable major" "$$next_major"; \
+		printf "  %-20s %-44s (%s)\n" "make bump-dev" "Start the next patch development cycle" "$$next_patch_dev"; \
+		printf "  %-20s %-44s (%s)\n" "make bump-minor-dev" "Start the next minor development cycle" "$$next_minor_dev"; \
+		printf "  %-20s %-44s (%s)\n" "make bump-major-dev" "Start the next major development cycle" "$$next_major_dev"; \
 	fi

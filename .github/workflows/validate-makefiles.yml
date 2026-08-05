@@ -31,8 +31,6 @@ on:
       - "examples/**"
       - "checkmake.ini"
 
-  workflow_dispatch:
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

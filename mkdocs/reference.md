@@ -177,6 +177,8 @@ skills/                         Skill fragments (.mk) and bash helper
 skills/_template.language.mk    Starter for a new language skill (copy → rename)
 mkdocs/                         Documentation source (this site)
 mkdocs.yml                      MkDocs configuration
+docs/                           Community standards (conduct, contributing, …)
+LICENCE                         MIT licence
 tests/                          Shell integration tests
 overrides/                      Material theme overrides
 ```

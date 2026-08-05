@@ -19,7 +19,7 @@ wrapper and `.gitignore`.
 
 | Skill | Always on? | Purpose |
 | --- | --- | --- |
-| Versioning | Yes | Controlled bump / RC / release flow with `bump-my-version` |
+| Versioning | Yes | Direct stable bumps plus optional `-dev` / `-rc` cycles (`bump-my-version`) |
 | Python | Optional | Lint, type-check, test, audit, build, publish (prefixed targets) |
 | MkDocs | Optional | Build and serve docs (`mkdocs-serve` supports custom ports) |
 | Bash | Optional | Discover scripts, `bash -n`, ShellCheck |

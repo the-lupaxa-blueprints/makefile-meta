@@ -30,32 +30,31 @@ eval "$(make -s completion)"
 # source /path/to/project/.makefiles/skills/completion/bash
 ```
 
-## Versioning workflow
+## Versioning
 
 Versioning is always on. Versions live in `.bumpversion.toml` and are applied
 with `bump-my-version`.
 
-Enforced flow:
+### Direct stable bumps
 
-```text
-Stable → Development (-devN) → Release candidate (-rcN) → Stable
+```make
+make bump-patch    # 1.2.3 → 1.2.4
+make bump-minor    # 1.2.3 → 1.3.0
+make bump-major    # 1.2.3 → 2.0.0
 ```
 
-Typical patch cycle:
+### Optional pre-release cycle
 
-```bash
-make bump-dev      # 1.2.3 → 1.2.4-dev1 (or bump -devN)
+```make
+make bump-dev      # 1.2.3 → 1.2.4-dev1  (alias: bump-patch-dev)
 make bump-dev      # 1.2.4-dev1 → 1.2.4-dev2
-make bump-rc       # → 1.2.4-rc1
+make bump-rc       # → 1.2.4-rc1         (alias: bump-patch-rc)
 make release       # → 1.2.4
 ```
 
-From a stable version you can also start a minor or major cycle:
-
-```bash
-make bump-minor    # 1.2.3 → 1.3.0-dev1
-make bump-major    # 1.2.3 → 2.0.0-dev1
-```
+Minor/major pre-releases use `bump-minor-dev` / `bump-major-dev` and
+`bump-minor-rc` / `bump-major-rc`. While a `-devN` or `-rcN` cycle is open,
+only the matching channel may continue (strict channel).
 
 See valid next steps for the current stage:
 

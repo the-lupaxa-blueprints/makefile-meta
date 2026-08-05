@@ -39,10 +39,17 @@
 | --- | --- |
 | `make version` | Print current version from `.bumpversion.toml` |
 | `make show-version-flow` | Valid next bump/release commands for this stage |
-| `make bump-dev` | Start or continue patch development (`-devN`) |
-| `make bump-minor` | Start minor cycle from stable |
-| `make bump-major` | Start major cycle from stable |
-| `make bump-rc` | Promote `-devN` → `-rc1` or bump `-rcN` |
+| `make bump-patch` | Bump to next stable patch (`X.Y.Z+1`) |
+| `make bump-minor` | Bump to next stable minor (`X.Y+1.0`) |
+| `make bump-major` | Bump to next stable major (`X+1.0.0`) |
+| `make bump-dev` | Alias of `bump-patch-dev` |
+| `make bump-patch-dev` | Start or continue patch `-devN` |
+| `make bump-minor-dev` | Start or continue minor `-devN` |
+| `make bump-major-dev` | Start or continue major `-devN` |
+| `make bump-rc` | Alias of `bump-patch-rc` |
+| `make bump-patch-rc` | Promote patch `-devN` → `-rc1` or bump `-rcN` |
+| `make bump-minor-rc` | Promote minor `-devN` → `-rc1` or bump `-rcN` |
+| `make bump-major-rc` | Promote major `-devN` → `-rc1` or bump `-rcN` |
 | `make release` | Promote `-rcN` → stable |
 | `make bump-final` | Alias of `release` |
 | `make doctor-versioning` | Check version file, bump tool, git work tree |

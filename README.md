@@ -72,9 +72,11 @@ stable pin; consumers can continue using the default `head` until then.
 
 ## Skills and commands
 
-`versioning` is always enabled and provides `make version`,
-`make show-version-flow`, `make bump-dev`, `make bump-minor`,
-`make bump-major`, `make bump-rc`, and `make release`.
+`versioning` is always enabled and provides direct stable bumps
+(`make bump-patch`, `make bump-minor`, `make bump-major`) plus an optional
+pre-release cycle (`make bump-dev`, `make bump-rc`, `make release`, and
+channel-specific `bump-*-dev` / `bump-*-rc` targets). See `make help` or
+`make show-version-flow` for valid next steps from the current version.
 
 Enable `python` for prefixed commands such as `make python-lint`,
 `make python-type`, `make python-test`, `make python-check`, and

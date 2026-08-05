@@ -24,7 +24,7 @@ endif
 
 .DEFAULT_GOAL := help
 
-.PHONY: init install update help doctor version bump-dev bump-minor bump-major bump-rc release bump-final show-version-flow status completion completion-path print-targets
+.PHONY: init install update help doctor version bump-patch bump-patch-dev bump-minor-dev bump-major-dev bump-patch-rc bump-minor-rc bump-major-rc bump-dev bump-minor bump-major bump-rc release bump-final show-version-flow status completion completion-path print-targets
 
 # -----------------------------------------------------------------------------
 # Lifecycle

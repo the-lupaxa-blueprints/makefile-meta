@@ -10,7 +10,9 @@ MAKEFILES_REF ?= head
 MAKEFILES_TRANSPORT ?= ssh
 SKILLS ?=
 
-.PHONY: bump-dev bump-final bump-major bump-minor bump-rc doctor doctor-versioning help-versioning release show-version-flow status version
+.PHONY: bump-patch bump-minor bump-major bump-patch-dev bump-minor-dev bump-major-dev bump-dev \
+	bump-patch-rc bump-minor-rc bump-major-rc bump-rc release bump-final \
+	doctor doctor-versioning help-versioning show-version-flow status version
 
 # Status is always-on (printed before Versioning) so it appears even when the
 # consumer wrapper's help text is outdated.
@@ -22,11 +24,18 @@ help-versioning:
 	@echo "Versioning:"
 	@echo "  version             Show the current project version"
 	@echo "  show-version-flow   Show the version stage and valid next steps"
-	@echo "  bump-dev            Start or continue the next patch development cycle"
-	@echo "  bump-minor          Start the next minor development cycle"
-	@echo "  bump-major          Start the next major development cycle"
-	@echo "  bump-rc             Start or continue the release candidate cycle"
-	@echo "  release             Publish the current release candidate as stable"
+	@echo "  bump-patch          Bump to the next stable patch (X.Y.Z+1)"
+	@echo "  bump-minor          Bump to the next stable minor (X.Y+1.0)"
+	@echo "  bump-major          Bump to the next stable major (X+1.0.0)"
+	@echo "  bump-dev            Alias of bump-patch-dev"
+	@echo "  bump-patch-dev      Start/continue patch -devN"
+	@echo "  bump-minor-dev      Start/continue minor -devN"
+	@echo "  bump-major-dev      Start/continue major -devN"
+	@echo "  bump-rc             Alias of bump-patch-rc"
+	@echo "  bump-patch-rc       Promote patch -devN → -rc1 or bump -rcN"
+	@echo "  bump-minor-rc       Promote minor -devN → -rc1 or bump -rcN"
+	@echo "  bump-major-rc       Promote major -devN → -rc1 or bump -rcN"
+	@echo "  release             Publish -rcN as stable"
 	@echo "  bump-final          Alias of release"
 	@echo "  doctor-versioning   Check versioning config and tools"
 	@echo
@@ -112,6 +121,66 @@ define require_version
 	}
 endef
 
+# flavour: patch|minor|major
+# mode: stable|dev|rc
+define run_version_bump
+	@$(require_version)
+	@flavour="$(1)"; mode="$(2)"; current="$(PROJECT_VERSION)"; \
+	base="$${current%%-*}"; \
+	maj="$${base%%.*}"; rest="$${base#*.}"; min="$${rest%%.*}"; pat="$${rest#*.}"; \
+	stage=stable; n=0; \
+	case "$$current" in \
+	  *-dev[0-9]*) stage=dev; n="$${current##*-dev}" ;; \
+	  *-rc[0-9]*) stage=rc; n="$${current##*-rc}" ;; \
+	esac; \
+	channel_ok() { \
+	  case "$$1" in \
+	    patch) [ "$$pat" -ge 1 ] ;; \
+	    minor) [ "$$pat" -eq 0 ] && [ "$$min" -ge 1 ] ;; \
+	    major) [ "$$pat" -eq 0 ] && [ "$$min" -eq 0 ] && [ "$$maj" -ge 1 ] ;; \
+	    *) return 1 ;; \
+	  esac; \
+	}; \
+	next_base() { \
+	  case "$$1" in \
+	    patch) echo "$$maj.$$min.$$((pat + 1))" ;; \
+	    minor) echo "$$maj.$$((min + 1)).0" ;; \
+	    major) echo "$$((maj + 1)).0.0" ;; \
+	  esac; \
+	}; \
+	new_version=""; \
+	case "$$mode" in \
+	  stable) \
+	    if [ "$$stage" != stable ]; then \
+	      echo "ERROR: bump-$$flavour requires a stable version (current: $$current)." >&2; exit 2; \
+	    fi; \
+	    new_version="$$(next_base "$$flavour")" ;; \
+	  dev) \
+	    if [ "$$stage" = rc ]; then \
+	      echo "ERROR: bump-$$flavour-dev cannot run on a release candidate ($$current)." >&2; exit 2; \
+	    fi; \
+	    if [ "$$stage" = stable ]; then \
+	      nb="$$(next_base "$$flavour")"; new_version="$$nb-dev1"; \
+	    else \
+	      if ! channel_ok "$$flavour"; then \
+	        echo "ERROR: bump-$$flavour-dev does not match open channel for $$current." >&2; exit 2; \
+	      fi; \
+	      new_version="$$base-dev$$((n + 1))"; \
+	    fi ;; \
+	  rc) \
+	    if [ "$$stage" = stable ]; then \
+	      echo "ERROR: bump-$$flavour-rc expects -devN or matching -rcN (current: $$current)." >&2; exit 2; \
+	    fi; \
+	    if ! channel_ok "$$flavour"; then \
+	      echo "ERROR: bump-$$flavour-rc does not match open channel for $$current." >&2; exit 2; \
+	    fi; \
+	    if [ "$$stage" = dev ]; then new_version="$$base-rc1"; \
+	    else new_version="$$base-rc$$((n + 1))"; fi ;; \
+	esac; \
+	echo "Bump $$mode ($$flavour): $$current -> $$new_version"; \
+	$(BUMP) bump version --new-version "$$new_version"
+endef
+
 doctor-versioning:
 	@failures=0; \
 	printf '\nVersioning doctor:\n'; \
@@ -187,14 +256,20 @@ status:
 				printf '  %-22s %s\n' "Next stable release:" "$$base" ;; \
 			*) \
 				stage="Final / stable release"; \
-				next_patch="$$major.$$minor.$$((patch + 1))-dev1"; \
-				next_minor="$$major.$$((minor + 1)).0-dev1"; \
-				next_major="$$((major + 1)).0.0-dev1"; \
+				next_patch="$$major.$$minor.$$((patch + 1))"; \
+				next_minor="$$major.$$((minor + 1)).0"; \
+				next_major="$$((major + 1)).0.0"; \
+				next_patch_dev="$$next_patch-dev1"; \
+				next_minor_dev="$$next_minor-dev1"; \
+				next_major_dev="$$next_major-dev1"; \
 				printf '  %-22s %s\n' "Current version:" "$$current"; \
 				printf '  %-22s %s\n' "Stage:" "$$stage"; \
-				printf '  %-22s %s\n' "Next patch cycle:" "$$next_patch"; \
-				printf '  %-22s %s\n' "Next minor cycle:" "$$next_minor"; \
-				printf '  %-22s %s\n' "Next major cycle:" "$$next_major" ;; \
+				printf '  %-22s %s\n' "Next patch (stable):" "$$next_patch"; \
+				printf '  %-22s %s\n' "Next minor (stable):" "$$next_minor"; \
+				printf '  %-22s %s\n' "Next major (stable):" "$$next_major"; \
+				printf '  %-22s %s\n' "Next patch (dev):" "$$next_patch_dev"; \
+				printf '  %-22s %s\n' "Next minor (dev):" "$$next_minor_dev"; \
+				printf '  %-22s %s\n' "Next major (dev):" "$$next_major_dev" ;; \
 		esac; \
 	else \
 		printf '  %-22s %s\n' "Current version:" "[UNAVAILABLE]"; \
@@ -235,43 +310,32 @@ version:
 	@$(require_version)
 	@echo "$(PROJECT_NAME) version: $(PROJECT_VERSION)"
 
-bump-dev:
-	@$(require_version)
-	@current="$(PROJECT_VERSION)"; \
-	case "$$current" in \
-		*-rc[0-9]*) echo "ERROR: bump-dev cannot be used on a release candidate ($$current)." >&2; exit 2 ;; \
-		*-dev[0-9]*) base="$${current%-dev*}"; n="$${current##*-dev}"; new_n=$$((n + 1)); new_version="$$base-dev$$new_n" ;; \
-		*) base="$${current%%-*}"; major="$${base%%.*}"; minor_patch="$${base#*.}"; minor="$${minor_patch%%.*}"; patch="$${minor_patch##*.}"; new_patch=$$((patch + 1)); new_version="$$major.$$minor.$$new_patch-dev1" ;; \
-	esac; \
-	echo "Bump development version: $$current -> $$new_version"; \
-	$(BUMP) bump version --new-version "$$new_version"
+bump-patch:
+	$(call run_version_bump,patch,stable)
 
 bump-minor:
-	@$(require_version)
-	@current="$(PROJECT_VERSION)"; \
-	case "$$current" in *-dev[0-9]*|*-rc[0-9]*) echo "ERROR: bump-minor can only be used from a stable version ($$current)." >&2; exit 2 ;; esac; \
-	base="$${current%%-*}"; major="$${base%%.*}"; minor_patch="$${base#*.}"; minor="$${minor_patch%%.*}"; new_minor=$$((minor + 1)); new_version="$$major.$$new_minor.0-dev1"; \
-	echo "Start minor development cycle: $$current -> $$new_version"; \
-	$(BUMP) bump version --new-version "$$new_version"
+	$(call run_version_bump,minor,stable)
 
 bump-major:
-	@$(require_version)
-	@current="$(PROJECT_VERSION)"; \
-	case "$$current" in *-dev[0-9]*|*-rc[0-9]*) echo "ERROR: bump-major can only be used from a stable version ($$current)." >&2; exit 2 ;; esac; \
-	base="$${current%%-*}"; major="$${base%%.*}"; new_major=$$((major + 1)); new_version="$$new_major.0.0-dev1"; \
-	echo "Start major development cycle: $$current -> $$new_version"; \
-	$(BUMP) bump version --new-version "$$new_version"
+	$(call run_version_bump,major,stable)
 
-bump-rc:
-	@$(require_version)
-	@current="$(PROJECT_VERSION)"; \
-	case "$$current" in \
-		*-dev[0-9]*) base="$${current%-dev*}"; new_version="$$base-rc1" ;; \
-		*-rc[0-9]*) base="$${current%-rc*}"; n="$${current##*-rc}"; new_n=$$((n + 1)); new_version="$$base-rc$$new_n" ;; \
-		*) echo "ERROR: bump-rc expects a -devN or -rcN version (current: $$current)." >&2; exit 2 ;; \
-	esac; \
-	echo "Bump release candidate: $$current -> $$new_version"; \
-	$(BUMP) bump version --new-version "$$new_version"
+bump-patch-dev bump-dev:
+	$(call run_version_bump,patch,dev)
+
+bump-minor-dev:
+	$(call run_version_bump,minor,dev)
+
+bump-major-dev:
+	$(call run_version_bump,major,dev)
+
+bump-patch-rc bump-rc:
+	$(call run_version_bump,patch,rc)
+
+bump-minor-rc:
+	$(call run_version_bump,minor,rc)
+
+bump-major-rc:
+	$(call run_version_bump,major,rc)
 
 release bump-final:
 	@$(require_version)
@@ -285,21 +349,29 @@ show-version-flow:
 	@current="$(PROJECT_VERSION)"; \
 	base="$${current%%-*}"; major="$${base%%.*}"; minor_patch="$${base#*.}"; minor="$${minor_patch%%.*}"; patch="$${minor_patch##*.}"; \
 	next_patch="$$major.$$minor.$$((patch + 1))"; next_minor="$$major.$$((minor + 1)).0"; next_major="$$((major + 1)).0.0"; \
+	if [ "$$patch" -ge 1 ]; then flavour=patch; \
+	elif [ "$$minor" -ge 1 ]; then flavour=minor; \
+	else flavour=major; fi; \
+	if [ "$$flavour" = patch ]; then dev_target="bump-dev"; rc_target="bump-rc"; \
+	else dev_target="bump-$$flavour-dev"; rc_target="bump-$$flavour-rc"; fi; \
 	echo "Current version: $$current"; echo; \
 	if echo "$$current" | grep -Eq -- '-dev[0-9]+$$'; then \
 		dev_number="$${current##*-dev}"; next_dev="$$base-dev$$((dev_number + 1))"; next_rc="$$base-rc1"; \
 		echo "Stage: development pre-release"; echo; echo "Suggested next steps:"; echo; \
-		printf "  %-16s %-44s (%s)\n" "make bump-dev" "Continue the development cycle" "$$next_dev"; \
-		printf "  %-16s %-44s (%s)\n" "make bump-rc" "Promote to the first release candidate" "$$next_rc"; \
+		printf "  %-16s %-44s (%s)\n" "make $$dev_target" "Continue the development cycle" "$$next_dev"; \
+		printf "  %-16s %-44s (%s)\n" "make $$rc_target" "Promote to the first release candidate" "$$next_rc"; \
 	elif echo "$$current" | grep -Eq -- '-rc[0-9]+$$'; then \
 		rc_number="$${current##*-rc}"; next_rc="$$base-rc$$((rc_number + 1))"; \
 		echo "Stage: release candidate"; echo; echo "Suggested next steps:"; echo; \
-		printf "  %-16s %-44s (%s)\n" "make bump-rc" "Continue the release candidate cycle" "$$next_rc"; \
+		printf "  %-16s %-44s (%s)\n" "make $$rc_target" "Continue the release candidate cycle" "$$next_rc"; \
 		printf "  %-16s %-44s (%s)\n" "make release" "Publish the stable release" "$$base"; \
 	else \
-		next_dev="$$next_patch-dev1"; next_minor_dev="$$next_minor-dev1"; next_major_dev="$$next_major-dev1"; \
+		next_patch_dev="$$next_patch-dev1"; next_minor_dev="$$next_minor-dev1"; next_major_dev="$$next_major-dev1"; \
 		echo "Stage: final / stable release"; echo; echo "Suggested next steps:"; echo; \
-		printf "  %-16s %-44s (%s)\n" "make bump-dev" "Start the next patch development cycle" "$$next_dev"; \
-		printf "  %-16s %-44s (%s)\n" "make bump-minor" "Start the next minor development cycle" "$$next_minor_dev"; \
-		printf "  %-16s %-44s (%s)\n" "make bump-major" "Start the next major development cycle" "$$next_major_dev"; \
+		printf "  %-16s %-44s (%s)\n" "make bump-patch" "Bump to the next stable patch" "$$next_patch"; \
+		printf "  %-16s %-44s (%s)\n" "make bump-minor" "Bump to the next stable minor" "$$next_minor"; \
+		printf "  %-16s %-44s (%s)\n" "make bump-major" "Bump to the next stable major" "$$next_major"; \
+		printf "  %-16s %-44s (%s)\n" "make bump-dev" "Start the next patch development cycle" "$$next_patch_dev"; \
+		printf "  %-16s %-44s (%s)\n" "make bump-minor-dev" "Start the next minor development cycle" "$$next_minor_dev"; \
+		printf "  %-16s %-44s (%s)\n" "make bump-major-dev" "Start the next major development cycle" "$$next_major_dev"; \
 	fi

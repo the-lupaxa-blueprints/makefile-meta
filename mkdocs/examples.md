@@ -26,7 +26,8 @@ cp examples/Makefile.versioning-only ./Makefile
 # add .makefiles/ to .gitignore
 make init
 make doctor
-make bump-dev
+make bump-patch
+# or, to start a -devN pre-release cycle instead: make bump-dev
 ```
 
 ## Python

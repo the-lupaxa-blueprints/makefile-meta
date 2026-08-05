@@ -2,8 +2,6 @@ name: YAML Linter
 
 on:
   push:
-    branches:
-      - "master"
     paths:
       - ".github/workflows/yaml-linter.yml"
       - "**/*.yml"

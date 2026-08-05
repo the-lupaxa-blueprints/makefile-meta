@@ -2,8 +2,6 @@ name: Validate Makefiles
 
 on:
   push:
-    branches:
-      - "master"
     paths:
       - ".github/workflows/validate-makefiles.yml"
       - "Makefile"

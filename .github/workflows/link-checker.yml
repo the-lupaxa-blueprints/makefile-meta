@@ -2,8 +2,6 @@ name: Link Checker
 
 on:
   push:
-    branches:
-      - "master"
     paths:
       - ".github/workflows/link-checker.yml"
       - "**/*.md"

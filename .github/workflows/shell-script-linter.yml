@@ -2,8 +2,6 @@ name: Shell Script Linter
 
 on:
   push:
-    branches:
-      - "master"
     paths:
       - ".github/workflows/shell-script-linter.yml"
       - "**/*.sh"

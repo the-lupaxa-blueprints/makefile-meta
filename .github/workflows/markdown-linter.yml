@@ -2,8 +2,6 @@ name: Markdown Linter
 
 on:
   push:
-    branches:
-      - "master"
     paths:
       - ".github/workflows/markdown-linter.yml"
       - "**/*.md"

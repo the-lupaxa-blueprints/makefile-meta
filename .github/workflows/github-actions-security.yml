@@ -2,8 +2,6 @@ name: GitHub Actions Security
 
 on:
   push:
-    branches:
-      - "master"
     paths:
       - ".github/workflows/*.yml"
       - ".github/workflows/*.yaml"

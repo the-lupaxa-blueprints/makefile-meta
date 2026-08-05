@@ -2,6 +2,8 @@ name: Validate Makefiles
 
 on:
   push:
+    branches:
+      - "master"
     paths:
       - ".github/workflows/validate-makefiles.yml"
       - "Makefile"
@@ -16,6 +18,8 @@ on:
       - "checkmake.ini"
 
   pull_request:
+    branches:
+      - "master"
     paths:
       - ".github/workflows/validate-makefiles.yml"
       - "Makefile"
@@ -45,7 +49,7 @@ jobs:
     uses: the-lupaxa-project/workflows/.github/workflows/reusable-makefile-linter.yml@master
     with:
       check_conventions: true
-      exclude_files: "^site/|^mkdocs/"
+      exclude_files: "^site/|^mkdocs/|^\\.makefiles/"
 
   generate-workflow-summary:
     name: Generate Workflow Summary

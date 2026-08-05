@@ -6,16 +6,10 @@ on:
       - master
     paths:
       - ".github/workflows/publish-mkdocs.yml"
-      - "data/**"
-      - "gallery_lib.py"
-      - "main.py"
       - "mkdocs/**"
       - "mkdocs.yml"
       - "overrides/**"
-      - "quotes_lib.py"
       - "requirements.txt"
-      - "articles_lib.py"
-      - "hooks/**"
 
   workflow_dispatch:
 

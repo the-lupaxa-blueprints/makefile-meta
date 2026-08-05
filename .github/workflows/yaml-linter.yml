@@ -1,19 +1,23 @@
-name: GitHub Actions Security
+name: YAML Linter
 
 on:
   push:
     branches:
       - "master"
     paths:
-      - ".github/workflows/*.yml"
-      - ".github/workflows/*.yaml"
+      - ".github/workflows/yaml-linter.yml"
+      - "**/*.yml"
+      - "**/*.yaml"
+      - ".yamllint.yml"
 
   pull_request:
     branches:
       - "master"
     paths:
-      - ".github/workflows/*.yml"
-      - ".github/workflows/*.yaml"
+      - ".github/workflows/yaml-linter.yml"
+      - "**/*.yml"
+      - "**/*.yaml"
+      - ".yamllint.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,17 +26,17 @@ concurrency:
 permissions:
   actions: read
   contents: read
-  pull-requests: write
 
 jobs:
-  github-actions-security:
-    name: GitHub Actions Security
-    uses: the-lupaxa-project/workflows/.github/workflows/reusable-github-actions-security.yml@master
+  yaml-linter:
+    name: YAML Linter
+    uses: the-lupaxa-project/workflows/.github/workflows/reusable-yaml-linter.yml@master
+    secrets: inherit
 
   generate-workflow-summary:
     name: Generate Workflow Summary
     needs:
-      - github-actions-security
+      - yaml-linter
     if: always()
     uses: the-lupaxa-project/workflows/.github/workflows/reusable-workflow-summary.yml@master
 

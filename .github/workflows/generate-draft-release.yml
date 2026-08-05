@@ -42,7 +42,6 @@ permissions:
 jobs:
   generate-draft-release:
     name: Generate Draft Release
-    if: ${{ github.repository != 'the-lupaxa-project-private/repository-bootstrap-template' }}  # lupaxa-template-guard
     uses: the-lupaxa-project/workflows/.github/workflows/reusable-github-release-generator.yml@master
     with:
       tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
@@ -56,14 +55,14 @@ jobs:
     name: Generate Workflow Summary
     needs:
       - generate-draft-release
-    if: ${{ always() && github.repository != 'the-lupaxa-project-private/repository-bootstrap-template' }}  # lupaxa-template-guard
+    if: always()
     uses: the-lupaxa-project/workflows/.github/workflows/reusable-workflow-summary.yml@master
 
   generate-workflow-notifications:
     name: Generate Workflow Notifications
     needs:
       - generate-workflow-summary
-    if: ${{ always() && github.repository != 'the-lupaxa-project-private/repository-bootstrap-template' }}  # lupaxa-template-guard
+    if: always()
     uses: the-lupaxa-project/workflows/.github/workflows/reusable-workflow-notifier.yml@master
     with:
       notify_on_results: "failure,timed_out"

@@ -2,40 +2,30 @@ name: Validate MkDocs
 
 on:
   push:
+    branches:
+      - "master"
     paths:
       - ".github/workflows/validate-mkdocs.yml"
       - ".markdownlint.yml"
       - ".markdownlintignore"
       - ".markdownlint-cli2.jsonc"
-      - ".yamllint.yml"
-      - "data/**"
-      - "gallery_lib.py"
-      - "main.py"
       - "mkdocs/**"
       - "mkdocs.yml"
       - "overrides/**"
-      - "quotes_lib.py"
       - "requirements.txt"
-      - "articles_lib.py"
-      - "hooks/**"
 
   pull_request:
+    branches:
+      - "master"
     paths:
       - ".github/workflows/validate-mkdocs.yml"
       - ".markdownlint.yml"
       - ".markdownlintignore"
       - ".markdownlint-cli2.jsonc"
-      - ".yamllint.yml"
-      - "data/**"
-      - "gallery_lib.py"
-      - "main.py"
       - "mkdocs/**"
       - "mkdocs.yml"
       - "overrides/**"
-      - "quotes_lib.py"
       - "requirements.txt"
-      - "articles_lib.py"
-      - "hooks/**"
 
   workflow_dispatch:
 

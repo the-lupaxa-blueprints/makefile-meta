@@ -1,19 +1,19 @@
-name: GitHub Actions Security
+name: Link Checker
 
 on:
   push:
     branches:
       - "master"
     paths:
-      - ".github/workflows/*.yml"
-      - ".github/workflows/*.yaml"
+      - ".github/workflows/link-checker.yml"
+      - "**/*.md"
 
   pull_request:
     branches:
       - "master"
     paths:
-      - ".github/workflows/*.yml"
-      - ".github/workflows/*.yaml"
+      - ".github/workflows/link-checker.yml"
+      - "**/*.md"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,17 +22,17 @@ concurrency:
 permissions:
   actions: read
   contents: read
-  pull-requests: write
 
 jobs:
-  github-actions-security:
-    name: GitHub Actions Security
-    uses: the-lupaxa-project/workflows/.github/workflows/reusable-github-actions-security.yml@master
+  link-checker:
+    name: Link Checker
+    uses: the-lupaxa-project/workflows/.github/workflows/reusable-link-checker.yml@master
+    secrets: inherit
 
   generate-workflow-summary:
     name: Generate Workflow Summary
     needs:
-      - github-actions-security
+      - link-checker
     if: always()
     uses: the-lupaxa-project/workflows/.github/workflows/reusable-workflow-summary.yml@master
 

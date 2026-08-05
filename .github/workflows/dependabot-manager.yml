@@ -13,23 +13,24 @@ permissions:
   pull-requests: write
 
 jobs:
-  dependabot-manager:
-    name: Dependabot Manager
+  dependabot:
+    name: Dependabot
+    if: ${{ github.actor == 'dependabot[bot]' }}
     uses: the-lupaxa-project/workflows/.github/workflows/reusable-dependabot-manager.yml@master
     secrets: inherit
 
   generate-workflow-summary:
     name: Generate Workflow Summary
     needs:
-      - dependabot-manager
-    if: always()
+      - dependabot
+    if: ${{ always() && github.actor == 'dependabot[bot]' }}
     uses: the-lupaxa-project/workflows/.github/workflows/reusable-workflow-summary.yml@master
 
   generate-workflow-notifications:
     name: Generate Workflow Notifications
     needs:
       - generate-workflow-summary
-    if: always()
+    if: ${{ always() && github.actor == 'dependabot[bot]' }}
     uses: the-lupaxa-project/workflows/.github/workflows/reusable-workflow-notifier.yml@master
     with:
       notify_on_results: "failure,timed_out"

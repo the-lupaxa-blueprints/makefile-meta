@@ -145,4 +145,37 @@ assert_bump_fails bump-dev
 set_version "2.0.0-dev1"
 assert_bump_fails bump-patch-dev
 
+# show-version-flow / status: channel-specific target names for open cycles
+set_version "1.3.0-dev1"
+out="$(make -C "$CONSUMER" show-version-flow)"
+assert_contains "$out" "bump-minor-dev"
+assert_contains "$out" "bump-minor-rc"
+out="$(make -C "$CONSUMER" status)"
+assert_contains "$out" "bump-minor-dev"
+assert_contains "$out" "bump-minor-rc"
+
+set_version "2.0.0-rc1"
+out="$(make -C "$CONSUMER" show-version-flow)"
+assert_contains "$out" "bump-major-rc"
+out="$(make -C "$CONSUMER" status)"
+assert_contains "$out" "bump-major-rc"
+
+# 0.0.0-devN / 0.0.0-rcN must not be misclassified as an open major channel
+set_version "0.0.0-dev1"
+out="$(make -C "$CONSUMER" show-version-flow)"
+assert_not_contains "$out" "bump-major-dev"
+assert_contains "$out" "No matching channel"
+out="$(make -C "$CONSUMER" status)"
+assert_not_contains "$out" "bump-major-dev"
+assert_contains "$out" "No matching channel"
+
+set_version "0.0.0-rc1"
+out="$(make -C "$CONSUMER" show-version-flow)"
+assert_not_contains "$out" "bump-major-rc"
+assert_contains "$out" "No matching channel"
+assert_contains "$out" "make release"
+out="$(make -C "$CONSUMER" status)"
+assert_not_contains "$out" "bump-major-rc"
+assert_contains "$out" "No matching channel"
+
 echo "PASS: test_versioning.sh"

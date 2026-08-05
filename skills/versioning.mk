@@ -235,6 +235,10 @@ status:
 		minor_patch="$${base#*.}"; \
 		minor="$${minor_patch%%.*}"; \
 		patch="$${minor_patch##*.}"; \
+		if [ "$$patch" -ge 1 ]; then flavour=patch; \
+		elif [ "$$minor" -ge 1 ]; then flavour=minor; \
+		elif [ "$$major" -ge 1 ]; then flavour=major; \
+		else flavour=""; fi; \
 		case "$$current" in \
 			*-dev[0-9]*) \
 				stage="Development pre-release"; \
@@ -243,17 +247,28 @@ status:
 				next_rc="$$base-rc1"; \
 				printf '  %-22s %s\n' "Current version:" "$$current"; \
 				printf '  %-22s %s\n' "Stage:" "$$stage"; \
-				printf '  %-22s %s\n' "Next development:" "$$next_dev"; \
-				printf '  %-22s %s\n' "Next release candidate:" "$$next_rc"; \
-				printf '  %-22s %s\n' "Next stable release:" "$$base" ;; \
+				if [ -n "$$flavour" ]; then \
+					if [ "$$flavour" = patch ]; then dev_target="bump-dev"; rc_target="bump-rc"; \
+					else dev_target="bump-$$flavour-dev"; rc_target="bump-$$flavour-rc"; fi; \
+					printf '  %-22s %s\n' "Next development:" "make $$dev_target ($$next_dev)"; \
+					printf '  %-22s %s\n' "Next release candidate:" "make $$rc_target ($$next_rc)"; \
+					printf '  %-22s %s\n' "Next stable release:" "$$base" ; \
+				else \
+					printf '  %-22s %s\n' "Next step:" "No matching channel continues this pre-release ($$base)" ; \
+				fi ;; \
 			*-rc[0-9]*) \
 				stage="Release candidate"; \
 				rc_number="$${current##*-rc}"; \
 				next_rc="$$base-rc$$((rc_number + 1))"; \
 				printf '  %-22s %s\n' "Current version:" "$$current"; \
 				printf '  %-22s %s\n' "Stage:" "$$stage"; \
-				printf '  %-22s %s\n' "Next release candidate:" "$$next_rc"; \
-				printf '  %-22s %s\n' "Next stable release:" "$$base" ;; \
+				if [ -n "$$flavour" ]; then \
+					if [ "$$flavour" = patch ]; then rc_target="bump-rc"; else rc_target="bump-$$flavour-rc"; fi; \
+					printf '  %-22s %s\n' "Next release candidate:" "make $$rc_target ($$next_rc)"; \
+				else \
+					printf '  %-22s %s\n' "Next release candidate:" "No matching channel continues this pre-release ($$base)"; \
+				fi; \
+				printf '  %-22s %s\n' "Next stable release:" "make release ($$base)" ;; \
 			*) \
 				stage="Final / stable release"; \
 				next_patch="$$major.$$minor.$$((patch + 1))"; \
@@ -351,19 +366,30 @@ show-version-flow:
 	next_patch="$$major.$$minor.$$((patch + 1))"; next_minor="$$major.$$((minor + 1)).0"; next_major="$$((major + 1)).0.0"; \
 	if [ "$$patch" -ge 1 ]; then flavour=patch; \
 	elif [ "$$minor" -ge 1 ]; then flavour=minor; \
-	else flavour=major; fi; \
+	elif [ "$$major" -ge 1 ]; then flavour=major; \
+	else flavour=""; fi; \
 	if [ "$$flavour" = patch ]; then dev_target="bump-dev"; rc_target="bump-rc"; \
-	else dev_target="bump-$$flavour-dev"; rc_target="bump-$$flavour-rc"; fi; \
+	elif [ -n "$$flavour" ]; then dev_target="bump-$$flavour-dev"; rc_target="bump-$$flavour-rc"; \
+	else dev_target=""; rc_target=""; fi; \
 	echo "Current version: $$current"; echo; \
 	if echo "$$current" | grep -Eq -- '-dev[0-9]+$$'; then \
 		dev_number="$${current##*-dev}"; next_dev="$$base-dev$$((dev_number + 1))"; next_rc="$$base-rc1"; \
-		echo "Stage: development pre-release"; echo; echo "Suggested next steps:"; echo; \
-		printf "  %-16s %-44s (%s)\n" "make $$dev_target" "Continue the development cycle" "$$next_dev"; \
-		printf "  %-16s %-44s (%s)\n" "make $$rc_target" "Promote to the first release candidate" "$$next_rc"; \
+		echo "Stage: development pre-release"; echo; \
+		if [ -n "$$flavour" ]; then \
+			echo "Suggested next steps:"; echo; \
+			printf "  %-16s %-44s (%s)\n" "make $$dev_target" "Continue the development cycle" "$$next_dev"; \
+			printf "  %-16s %-44s (%s)\n" "make $$rc_target" "Promote to the first release candidate" "$$next_rc"; \
+		else \
+			echo "No matching channel continues this pre-release ($$base): patch/minor/major bumps require the corresponding X.Y.Z part to be >=1."; \
+		fi; \
 	elif echo "$$current" | grep -Eq -- '-rc[0-9]+$$'; then \
 		rc_number="$${current##*-rc}"; next_rc="$$base-rc$$((rc_number + 1))"; \
 		echo "Stage: release candidate"; echo; echo "Suggested next steps:"; echo; \
-		printf "  %-16s %-44s (%s)\n" "make $$rc_target" "Continue the release candidate cycle" "$$next_rc"; \
+		if [ -n "$$flavour" ]; then \
+			printf "  %-16s %-44s (%s)\n" "make $$rc_target" "Continue the release candidate cycle" "$$next_rc"; \
+		else \
+			echo "  (No matching channel continues this pre-release ($$base); further -rc bumps are unavailable.)"; \
+		fi; \
 		printf "  %-16s %-44s (%s)\n" "make release" "Publish the stable release" "$$base"; \
 	else \
 		next_patch_dev="$$next_patch-dev1"; next_minor_dev="$$next_minor-dev1"; next_major_dev="$$next_major-dev1"; \

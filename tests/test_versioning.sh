@@ -52,11 +52,21 @@ assert_bump_fails() {
   local target="$1"
   local err rc=0
   err="$(make -C "$CONSUMER" "$target" 2>&1 >/dev/null)" || rc=$?
-  if [ "$rc" -eq 0 ]; then
-    echo "ASSERT: expected make $target to fail" >&2
+  if [ "$rc" -ne 2 ]; then
+    echo "ASSERT: expected make $target to exit 2, got $rc" >&2
     exit 1
   fi
   assert_contains "$err" "ERROR"
+}
+
+assert_alias_equivalent() {
+  local start="$1" canonical="$2" alias="$3" expected="$4"
+  set_version "$start"
+  run_bump "$canonical"
+  assert_version "$expected"
+  set_version "$start"
+  run_bump "$alias"
+  assert_version "$expected"
 }
 
 # Help lists new flexible bump targets
@@ -104,6 +114,22 @@ assert_version "1.3.0-rc1"
 run_bump release
 assert_version "1.3.0"
 
+# Aliases behave like their canonical targets
+assert_alias_equivalent "1.2.3" bump-patch-dev bump-dev "1.2.4-dev1"
+assert_alias_equivalent "1.2.4-dev1" bump-patch-rc bump-rc "1.2.4-rc1"
+assert_alias_equivalent "1.2.4-rc1" release bump-final "1.2.4"
+
+# Major pre-release channel
+set_version "1.2.3"
+run_bump bump-major-dev
+assert_version "2.0.0-dev1"
+
+run_bump bump-major-rc
+assert_version "2.0.0-rc1"
+
+run_bump release
+assert_version "2.0.0"
+
 # Strict-channel error cases
 set_version "1.2.3"
 assert_bump_fails bump-rc
@@ -115,5 +141,8 @@ assert_bump_fails release
 
 set_version "1.2.4-rc1"
 assert_bump_fails bump-dev
+
+set_version "2.0.0-dev1"
+assert_bump_fails bump-patch-dev
 
 echo "PASS: test_versioning.sh"

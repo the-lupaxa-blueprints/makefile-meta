@@ -117,7 +117,17 @@ assert_version "1.3.0"
 # Aliases behave like their canonical targets
 assert_alias_equivalent "1.2.3" bump-patch-dev bump-dev "1.2.4-dev1"
 assert_alias_equivalent "1.2.4-dev1" bump-patch-rc bump-rc "1.2.4-rc1"
+assert_alias_equivalent "1.2.3" bump-patch-rc bump-rc "1.2.4-rc1"
 assert_alias_equivalent "1.2.4-rc1" release bump-final "1.2.4"
+
+# Direct stable → -rc1 (no -dev required)
+set_version "1.2.3"
+run_bump bump-rc
+assert_version "1.2.4-rc1"
+
+set_version "1.2.3"
+run_bump bump-minor-rc
+assert_version "1.3.0-rc1"
 
 # Major pre-release channel
 set_version "1.2.3"
@@ -130,10 +140,7 @@ assert_version "2.0.0-rc1"
 run_bump release
 assert_version "2.0.0"
 
-# Strict-channel error cases
-set_version "1.2.3"
-assert_bump_fails bump-rc
-
+# Strict-channel error cases (stable → rc is allowed)
 set_version "1.2.4-dev1"
 assert_bump_fails bump-minor-dev
 assert_bump_fails bump-patch
@@ -177,5 +184,34 @@ assert_contains "$out" "make release"
 out="$(make -C "$CONSUMER" status)"
 assert_not_contains "$out" "bump-major-rc"
 assert_contains "$out" "No matching channel"
+
+# draft-tag: packaging helper outside the version flow
+out="$(make -C "$CONSUMER" help-versioning)"
+assert_contains "$out" "draft-tag"
+assert_contains "$out" "GitHub packaging"
+
+git -C "$CONSUMER" init -q
+git -C "$CONSUMER" config user.email "test@example.com"
+git -C "$CONSUMER" config user.name "Test"
+git -C "$CONSUMER" config commit.gpgsign false
+git -C "$CONSUMER" config tag.gpgSign false
+git -C "$CONSUMER" add -A
+git -C "$CONSUMER" commit -qm "init"
+
+set_version "1.2.4-rc1"
+before="$(sed -n 's/^current_version = "\([^"]*\)"/\1/p' "$CONSUMER/.bumpversion.toml")"
+out="$(make -C "$CONSUMER" draft-tag)"
+assert_contains "$out" "v1.2.4-draft1"
+assert_contains "$out" "unchanged: 1.2.4-rc1"
+after="$(sed -n 's/^current_version = "\([^"]*\)"/\1/p' "$CONSUMER/.bumpversion.toml")"
+test "$before" = "$after"
+git -C "$CONSUMER" rev-parse -q --verify refs/tags/v1.2.4-draft1 >/dev/null
+
+out="$(make -C "$CONSUMER" draft-tag)"
+assert_contains "$out" "v1.2.4-draft2"
+git -C "$CONSUMER" rev-parse -q --verify refs/tags/v1.2.4-draft2 >/dev/null
+
+out="$(make -C "$CONSUMER" draft-tag DRAFT_BASE=9.9.9)"
+assert_contains "$out" "v9.9.9-draft1"
 
 echo "PASS: test_versioning.sh"

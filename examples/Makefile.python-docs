@@ -24,7 +24,7 @@ endif
 
 .DEFAULT_GOAL := help
 
-.PHONY: init install update help doctor version bump-patch bump-patch-dev bump-minor-dev bump-major-dev bump-patch-rc bump-minor-rc bump-major-rc bump-dev bump-minor bump-major bump-rc release bump-final show-version-flow status completion completion-path print-targets
+.PHONY: init install update help doctor version bump-patch bump-patch-dev bump-minor-dev bump-major-dev bump-patch-rc bump-minor-rc bump-major-rc bump-dev bump-minor bump-major bump-rc release bump-final draft-tag show-version-flow status completion completion-path print-targets
 
 # -----------------------------------------------------------------------------
 # Lifecycle
@@ -129,7 +129,7 @@ endif
 
 # doctor / status come from skills/versioning.mk once installed.
 ifeq ($(wildcard $(MAKEFILES_DIR)/skills/versioning.mk),)
-doctor version bump-patch bump-minor bump-major bump-dev bump-patch-dev bump-minor-dev bump-major-dev bump-rc bump-patch-rc bump-minor-rc bump-major-rc release bump-final show-version-flow status:
+doctor version bump-patch bump-minor bump-major bump-dev bump-patch-dev bump-minor-dev bump-major-dev bump-rc bump-patch-rc bump-minor-rc bump-major-rc release bump-final draft-tag show-version-flow status:
 	@echo "ERROR: makefile skills not installed. Run: make init" >&2
 	@exit 2
 endif

@@ -43,20 +43,32 @@ make bump-minor    # 1.2.3 → 1.3.0
 make bump-major    # 1.2.3 → 2.0.0
 ```
 
-### Optional pre-release cycle
+### Optional pre-release cycles
+
+Start `-dev` and/or `-rc` when you want them — neither is required for a
+stable bump, and `-rc` does not require `-dev` first:
 
 ```make
 make bump-dev      # 1.2.3 → 1.2.4-dev1  (alias: bump-patch-dev)
-make bump-dev      # 1.2.4-dev1 → 1.2.4-dev2
-make bump-rc       # → 1.2.4-rc1         (alias: bump-patch-rc)
-make release       # → 1.2.4
+make bump-rc       # 1.2.3 → 1.2.4-rc1   (alias: bump-patch-rc; also from -devN)
+make release       # 1.2.4-rc1 → 1.2.4
 ```
 
-Minor/major pre-releases use `bump-minor-dev` / `bump-major-dev` and
+Minor/major flavours: `bump-minor-dev` / `bump-major-dev` and
 `bump-minor-rc` / `bump-major-rc`. While a `-devN` or `-rcN` cycle is open,
 only the matching channel may continue (strict channel).
 
-See valid next steps for the current stage:
+`-devN` versions are for local / in-repo WIP. They do **not** trigger a GitHub
+release workflow (unlike `-rcN` → test/prerelease release).
+
+### Draft GitHub tags (outside the version flow)
+
+`make draft-tag` creates the next `vX.Y.Z-draftN` annotated tag at `HEAD`
+without changing `.bumpversion.toml`. That tag triggers
+`generate-draft-release.yml`. Override the base with `DRAFT_BASE=1.2.4` if
+needed. Push the tag yourself (`git push origin vX.Y.Z-draftN`).
+
+See valid next **version** steps for the current stage:
 
 ```bash
 make show-version-flow

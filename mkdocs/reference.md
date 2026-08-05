@@ -47,11 +47,12 @@
 | `make bump-minor-dev` | Start or continue minor `-devN` |
 | `make bump-major-dev` | Start or continue major `-devN` |
 | `make bump-rc` | Alias of `bump-patch-rc` |
-| `make bump-patch-rc` | Promote patch `-devN` → `-rc1` or bump `-rcN` |
-| `make bump-minor-rc` | Promote minor `-devN` → `-rc1` or bump `-rcN` |
-| `make bump-major-rc` | Promote major `-devN` → `-rc1` or bump `-rcN` |
+| `make bump-patch-rc` | Start patch `-rc1` from stable or `-devN`, or bump `-rcN` |
+| `make bump-minor-rc` | Start minor `-rc1` from stable or `-devN`, or bump `-rcN` |
+| `make bump-major-rc` | Start major `-rc1` from stable or `-devN`, or bump `-rcN` |
 | `make release` | Promote `-rcN` → stable |
 | `make bump-final` | Alias of `release` |
+| `make draft-tag` | Create next `vX.Y.Z-draftN` git tag at HEAD (does not change `current_version`) |
 | `make doctor-versioning` | Check version file, bump tool, git work tree |
 
 </div>
@@ -65,6 +66,7 @@
 | `VERSION_FILE` | `.bumpversion.toml` |
 | `BUMP` | `bump-my-version` |
 | `PROJECT_NAME` | directory name |
+| `DRAFT_BASE` | _(optional)_ — `X.Y.Z` override for `draft-tag` |
 
 </div>
 

@@ -73,10 +73,14 @@ stable pin; consumers can continue using the default `head` until then.
 ## Skills and commands
 
 `versioning` is always enabled and provides direct stable bumps
-(`make bump-patch`, `make bump-minor`, `make bump-major`) plus an optional
-pre-release cycle (`make bump-dev`, `make bump-rc`, `make release`, and
-channel-specific `bump-*-dev` / `bump-*-rc` targets). See `make help` or
-`make show-version-flow` for valid next steps from the current version.
+(`make bump-patch`, `make bump-minor`, `make bump-major`) plus optional
+`-dev` / `-rc` pre-releases (`make bump-dev`, `make bump-rc`, `make release`,
+and channel-specific `bump-*-dev` / `bump-*-rc`). You can jump straight to
+`-rc1` from stable; `-dev` is not required. `-devN` does not create a GitHub
+release; `-rcN` tags feed the test/prerelease workflow. For GitHub **draft**
+releases (attach assets before publish), use `make draft-tag` — it only
+creates a `vX.Y.Z-draftN` git tag and does not change `current_version`.
+See `make help` or `make show-version-flow` for version next steps.
 
 Enable `python` for prefixed commands such as `make python-lint`,
 `make python-type`, `make python-test`, `make python-check`, and

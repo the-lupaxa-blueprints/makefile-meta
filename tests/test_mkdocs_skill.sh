@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# CI shellcheck runs one file at a time without -x; do not require following.
+# shellcheck source=/dev/null
 source "$(dirname "$0")/harness.sh"
 
 TMP="$(mktemp -d)"

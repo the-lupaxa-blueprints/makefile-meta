@@ -43,6 +43,15 @@ set -e
 test "$rc" -ne 0
 assert_contains "$err" "make init"
 
+# bump-patch (and other new bump targets) before init fail clearly too,
+# instead of silently succeeding once skills/versioning.mk is missing
+set +e
+err="$(make -C "$CONSUMER" bump-patch 2>&1)"
+rc=$?
+set -e
+test "$rc" -ne 0
+assert_contains "$err" "make init"
+
 # init clones from local repo path (skills/ only — sparse checkout)
 make -C "$CONSUMER" init MAKEFILES_REPO="$BARE"
 test -d "$CONSUMER/.makefiles/skills"

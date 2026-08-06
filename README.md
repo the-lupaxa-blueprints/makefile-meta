@@ -1,6 +1,6 @@
 <p align="center">
-    <a href="https://github.com/the-lupaxa-internal-toolbox">
-        <img src="https://raw.githubusercontent.com/the-lupaxa-project/brand-assets/master/logos/organisations/the-lupaxa-internal-toolbox/readme-logo.png" alt="Organisation Logo" />
+    <a href="https://github.com/lupaxa-developers-toolbox">
+        <img src="https://raw.githubusercontent.com/the-lupaxa-project/brand-assets/master/logos/organisations/developers-toolbox/readme-logo.png" alt="Organisation Logo" />
     </a>
 </p>
 
@@ -35,8 +35,8 @@ workflows.
 
    ```make
    MAKEFILES_TRANSPORT ?= https
-   MAKEFILES_REPO_SSH  ?= git@github.com:the-lupaxa-internal-toolbox/makefile-skills.git
-   MAKEFILES_REPO_HTTP ?= https://github.com/the-lupaxa-internal-toolbox/makefile-skills.git
+   MAKEFILES_REPO_SSH  ?= git@github.com:lupaxa-developers-toolbox/makefile-skills.git
+   MAKEFILES_REPO_HTTP ?= https://github.com/lupaxa-developers-toolbox/makefile-skills.git
    ```
 
    `MAKEFILES_TRANSPORT` selects which of the two URLs is used. Override

@@ -12,8 +12,8 @@ site_author: The Lupaxa Project
 
 site_url: https://makefile-skills.thelupaxaproject.org/
 
-repo_name: the-lupaxa-internal-toolbox/makefile-skills
-repo_url: https://github.com/the-lupaxa-internal-toolbox/makefile-skills
+repo_name: lupaxa-developers-toolbox/makefile-skills
+repo_url: https://github.com/lupaxa-developers-toolbox/makefile-skills
 
 extra:
   generator: false

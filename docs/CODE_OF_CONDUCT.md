@@ -1,6 +1,6 @@
 <p align="center">
-    <a href="https://github.com/the-lupaxa-internal-toolbox">
-        <img src="https://raw.githubusercontent.com/the-lupaxa-project/brand-assets/master/logos/organisations/the-lupaxa-internal-toolbox/readme-logo.png" alt="Organisation Logo" />
+    <a href="https://github.com/lupaxa-developers-toolbox">
+        <img src="https://raw.githubusercontent.com/the-lupaxa-project/brand-assets/master/logos/organisations/developers-toolbox/readme-logo.png" alt="Organisation Logo" />
     </a>
 </p>
 
@@ -24,5 +24,5 @@ Repository-specific exceptions or additional guidance, where applicable, should 
 [1]: https://github.com/the-lupaxa-project/.github/blob/master/docs/CODE_OF_CONDUCT.md
 
 <a href="https://github.com/the-lupaxa-project">
-    <img src="https://raw.githubusercontent.com/the-lupaxa-project/brand-assets/master/logos/components/footer.svg" alt="The Lupaxa Project Footer" width="100%" />
+    <img src="https://raw.githubusercontent.com/the-lupaxa-project/brand-assets/master/logos/components/footer-for-child-orgs.svg" alt="The Lupaxa Project Footer" width="100%" />
 </a>

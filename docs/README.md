@@ -1,6 +1,6 @@
 <p align="center">
-    <a href="https://github.com/the-lupaxa-internal-toolbox">
-        <img src="https://raw.githubusercontent.com/the-lupaxa-project/brand-assets/master/logos/organisations/the-lupaxa-internal-toolbox/readme-logo.png" alt="Organisation Logo" />
+    <a href="https://github.com/lupaxa-developers-toolbox">
+        <img src="https://raw.githubusercontent.com/the-lupaxa-project/brand-assets/master/logos/organisations/developers-toolbox/readme-logo.png" alt="Organisation Logo" />
     </a>
 </p>
 
@@ -19,5 +19,5 @@ The following documents define the standards that apply across **The Lupaxa Proj
 | [Support Guide](SUPPORT.md)           | How to obtain help and support.                                   |
 
 <a href="https://github.com/the-lupaxa-project">
-    <img src="https://raw.githubusercontent.com/the-lupaxa-project/brand-assets/master/logos/components/footer.svg" alt="The Lupaxa Project Footer" width="100%" />
+    <img src="https://raw.githubusercontent.com/the-lupaxa-project/brand-assets/master/logos/components/footer-for-child-orgs.svg" alt="The Lupaxa Project Footer" width="100%" />
 </a>

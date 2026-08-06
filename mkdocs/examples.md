@@ -1,7 +1,7 @@
 # Examples
 
-Ready-made wrappers live in [`examples/`](https://github.com/the-lupaxa-internal-toolbox/makefile-skills/tree/master/examples).
-Each file is a copy of [`templates/Makefile`](https://github.com/the-lupaxa-internal-toolbox/makefile-skills/blob/master/templates/Makefile)
+Ready-made wrappers live in [`examples/`](https://github.com/lupaxa-developers-toolbox/makefile-skills/tree/master/examples).
+Each file is a copy of [`templates/Makefile`](https://github.com/lupaxa-developers-toolbox/makefile-skills/blob/master/templates/Makefile)
 with only the `SKILLS` line changed.
 
 <div class="lupaxa-table lupaxa-table--examples" markdown="1">

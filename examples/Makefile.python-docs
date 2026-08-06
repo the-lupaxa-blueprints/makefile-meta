@@ -169,3 +169,39 @@ print-targets:
 
 -include $(MAKEFILES_DIR)/skills/versioning.mk
 $(foreach s,$(SKILLS),$(eval -include $(MAKEFILES_DIR)/skills/$(s).mk))
+
+# -----------------------------------------------------------------------------
+# CI-friendly aliases (reusable-python-makefile-ci expects these names)
+# -----------------------------------------------------------------------------
+# .makefiles/ is gitignored, so CI (and fresh clones) must init before the
+# python-* targets from makefile-skills exist. Each alias re-invokes $(MAKE)
+# so includes are re-read after init.
+
+.PHONY: ensure-skills install-dev install-test lint check format test
+
+ensure-skills:
+	@if [ ! -f "$(MAKEFILES_DIR)/skills/versioning.mk" ]; then \
+		if [ -e "$(MAKEFILES_DIR)" ]; then \
+			echo "==> Removing incomplete $(MAKEFILES_DIR) before init" >&2; \
+			rm -rf "$(MAKEFILES_DIR)"; \
+		fi; \
+		$(MAKE) --no-print-directory init; \
+	fi
+
+install-dev: ensure-skills
+	@$(MAKE) --no-print-directory python-install-dev
+
+install-test: ensure-skills
+	@$(MAKE) --no-print-directory python-install-test
+
+lint: ensure-skills
+	@$(MAKE) --no-print-directory python-lint
+
+check: ensure-skills
+	@$(MAKE) --no-print-directory python-check
+
+format: ensure-skills
+	@$(MAKE) --no-print-directory python-format
+
+test: ensure-skills
+	@$(MAKE) --no-print-directory python-test
